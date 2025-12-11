@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyQt
+*.ui.autosave
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Datos del proyecto
+data/estudios/*.json
+data/fotos/*
+!data/estudios/.gitkeep
+!data/fotos/.gitkeep
+
+# Exportaciones
+export/*
+!export/.gitkeep
+
+# Logs
+*.log
+
+# Configuración local (opcional)
+config.local.json
