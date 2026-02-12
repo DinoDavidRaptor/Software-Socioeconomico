@@ -1,4 +1,4 @@
-"""
+﻿"""
 Diálogo para mostrar información concentrada para análisis externo (IA).
 Autor: DINOS Tech
 Versión: 0.1.0

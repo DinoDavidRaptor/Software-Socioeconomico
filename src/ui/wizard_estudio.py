@@ -1,4 +1,4 @@
-"""
+﻿"""
 Wizard (asistente) para crear y editar estudios socioeconómicos.
 Autor: DINOS Tech
 Versión: 0.2.0 - Sistema modular con 150+ campos

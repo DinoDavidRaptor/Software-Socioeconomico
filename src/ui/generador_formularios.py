@@ -1,4 +1,4 @@
-"""
+﻿"""
 Generador automático de formularios basado en configuración de campos.
 Facilita la creación de páginas de wizard sin código repetitivo.
 Autor: DINOS Tech

@@ -1,5 +1,5 @@
-; =====================================================
-; INNO SETUP SCRIPT - Ecosistema Comercial 360
+﻿; =====================================================
+; INNO SETUP SCRIPT - SoftSE
 ; DINOS Tech - Copyright (c) 2026
 ; =====================================================
 ; Requisitos: Inno Setup 6.x (https://jrsoftware.org/isinfo.php)
@@ -15,7 +15,7 @@
 #define MyAppName "DINOS SoftSE"
 #define MyAppVersion "0.3.7"
 #define MyAppPublisher "DINOS Tech"
-#define MyAppURL "https://www.dinoraptor.tech/dinostech/SoftSE"
+#define MyAppURL "https://dinoraptor.tech/dinostech/SoftSE"
 #define MyAppExeName "DINOS SoftSE.exe"
 #define MyAppCopyright "Copyright (c) 2026 DINOS Tech"
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dialogo de configuracion de empresa.
 Permite editar nombre, direccion, telefono, email y logo.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.

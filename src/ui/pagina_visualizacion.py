@@ -1,4 +1,4 @@
-"""
+﻿"""
 Página de visualización con gráficas para estudios socioeconómicos.
 Autor: DINOS Tech
 Versión: 0.3.0

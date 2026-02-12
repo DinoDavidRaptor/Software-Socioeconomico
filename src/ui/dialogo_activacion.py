@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dialogo de activacion de licencia.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.
 """
@@ -35,7 +35,7 @@ class DialogoActivacion(QDialog):
         layout.setSpacing(15)
         
         # Titulo
-        titulo = QLabel("Ecosistema Comercial 360")
+        titulo = QLabel("SoftSE")
         titulo.setFont(QFont("Arial", 16, QFont.Bold))
         titulo.setAlignment(Qt.AlignCenter)
         layout.addWidget(titulo)

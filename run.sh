@@ -1,5 +1,5 @@
-#!/bin/bash
-# Script de ejecución para Ecosistema Comercial 360
+﻿#!/bin/bash
+# Script de ejecución para SoftSE
 # Activa el entorno virtual y ejecuta la aplicación
 
 # Colores para output
@@ -8,7 +8,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo "============================================================"
-echo "  Ecosistema Comercial 360"
+echo "  SoftSE"
 echo "  DINOS Tech"
 echo "============================================================"
 echo ""

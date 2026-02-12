@@ -1,9 +1,9 @@
-@echo off
-REM Script de ejecución para Ecosistema Comercial 360 (Windows)
+﻿@echo off
+REM Script de ejecución para SoftSE (Windows)
 REM Activa el entorno virtual y ejecuta la aplicación
 
 echo ============================================================
-echo   Ecosistema Comercial 360
+echo   SoftSE
 echo   DINOS Tech
 echo ============================================================
 echo.

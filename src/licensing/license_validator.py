@@ -1,4 +1,4 @@
-"""
+﻿"""
 Validador de licencias offline.
 Sistema de proteccion basado en Hardware ID + License Key.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.

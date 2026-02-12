@@ -1,4 +1,4 @@
-# 🦖 Ecosistema Comercial 360 - Sistema de Estudios Socioeconómicos
+﻿# 🦖 SoftSE - Sistema de Estudios Socioeconómicos
 
 **Versión:** 0.3.0 ⭐ ACTUALIZADO  
 **Autor:** DINOS Tech  
@@ -735,9 +735,9 @@ Para contribuir al proyecto:
 Para soporte técnico, consultas o reportar problemas:
 
 **DINOS Tech**  
-📧 Email: soporte@dinostech.com  
-📱 Teléfono: +52 (55) XXXX-XXXX  
-🌐 Web: www.dinostech.com
+Email: soporte@dinoraptor.tech  
+Telefono: 3333010376  
+Web: dinoraptor.tech/dinostech
 
 ## 📄 Licencia
 

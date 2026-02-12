@@ -1,4 +1,4 @@
-"""
+﻿"""
 Ventana principal del sistema de estudios socioeconómicos.
 Autor: DINOS Tech
 Versión: 0.4.0
@@ -53,7 +53,7 @@ class VentanaPrincipal(QMainWindow):
     
     def init_ui(self):
         """Inicializa la interfaz de usuario."""
-        self.setWindowTitle(f"Ecosistema Comercial 360 - {self.config_empresa.get('nombre', 'DINOS Tech')}")
+        self.setWindowTitle(f"SoftSE - {self.config_empresa.get('nombre', 'DINOS Tech')}")
         self.setGeometry(100, 100, 1200, 700)
         
         # Widget central

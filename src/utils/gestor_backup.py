@@ -1,4 +1,4 @@
-"""
+﻿"""
 Sistema de backup para estudios socioeconomicos.
 Permite exportar e importar todos los estudios en un archivo ZIP.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.
@@ -42,7 +42,7 @@ class GestorBackup:
                 metadata = {
                     'version': '1.0',
                     'fecha_backup': datetime.now().isoformat(),
-                    'app': 'Ecosistema Comercial 360',
+                    'app': 'SoftSE',
                     'empresa': 'DINOS Tech'
                 }
                 zf.writestr('backup_metadata.json', json.dumps(metadata, indent=2))

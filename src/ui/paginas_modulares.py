@@ -1,4 +1,4 @@
-"""
+﻿"""
 Páginas del wizard - VERSIÓN MODULAR 0.2.0
 Sistema automático de generación de formularios.
 Para agregar campos: solo modificar configuracion_campos.py

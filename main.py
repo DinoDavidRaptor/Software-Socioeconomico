@@ -1,7 +1,7 @@
-"""
-Sistema de Estudios Socioeconomicos - Ecosistema Comercial 360
+﻿"""
+Sistema de Estudios Socioeconomicos - SoftSE
 Autor: DINOS Tech
-Version: 0.3.7
+Version: 0.4.2
 Fecha: 12 de febrero de 2026
 
 Este sistema permite crear, gestionar y analizar estudios socioeconomicos completos
@@ -124,9 +124,9 @@ def main():
     
     # Crear aplicacion Qt
     app = QApplication(sys.argv)
-    app.setApplicationName("Ecosistema Comercial 360")
+    app.setApplicationName("SoftSE")
     app.setOrganizationName("DINOS Tech")
-    app.setOrganizationDomain("dinostech.com")
+    app.setOrganizationDomain("dinoraptor.tech/dinostech")
     
     # Establecer estilo
     app.setStyle('Fusion')

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Páginas del wizard - Parte 2
 Continúa las clases de páginas para el asistente.
 Autor: DINOS Tech

@@ -1,4 +1,4 @@
-TERMINOS Y CONDICIONES DE USO - ECOSISTEMA COMERCIAL 360
+﻿TERMINOS Y CONDICIONES DE USO - SoftSE
 =========================================================
 
 CONTRATO DE LICENCIA DE USUARIO FINAL (EULA)
@@ -12,7 +12,7 @@ Al instalar, copiar o utilizar este software, usted acepta los terminos de este 
 
 1. DEFINICIONES
 ---------------
-- "Software": Ecosistema Comercial 360 y todos sus componentes, actualizaciones y documentacion.
+- "Software": SoftSE y todos sus componentes, actualizaciones y documentacion.
 - "Licenciante": DINOS Tech, propietario y desarrollador del Software.
 - "Usuario": La persona o entidad que adquiere y utiliza el Software.
 - "Licencia": El derecho de uso otorgado bajo estos terminos.
@@ -103,8 +103,9 @@ DINOS Tech puede modificar estos terminos con previo aviso. El uso continuado de
 Para consultas sobre este acuerdo o para solicitar autorizaciones especiales:
 
 DINOS Tech
-Email: soporte@dinostech.com
-Sitio web: www.dinostech.com
+Email: soporte@dinoraptor.tech
+Telefono: 3333010376
+Sitio web: dinoraptor.tech/dinostech
 
 =========================================================
 AL HACER CLIC EN "ACEPTO" O AL INSTALAR EL SOFTWARE,

@@ -1,4 +1,4 @@
-# Assets para el Instalador - DINOS Tech
+﻿# Assets para el Instalador - DINOS Tech
 
 Esta carpeta contiene los recursos graficos para el instalador.
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dialogo de gestion de backups.
 Permite exportar e importar estudios.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.

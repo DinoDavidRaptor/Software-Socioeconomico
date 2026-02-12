@@ -1,4 +1,4 @@
-"""
+﻿"""
 Script de compilacion con Nuitka para DINOS Tech.
 Genera un ejecutable protegido y optimizado.
 
@@ -19,7 +19,7 @@ from datetime import datetime
 
 
 # Configuracion
-APP_NAME = "EcosistemaComercial360"
+APP_NAME = "SoftSE"
 VERSION = "0.3.7"
 COMPANY = "DINOS Tech"
 DESCRIPTION = "Sistema de Estudios Socioeconomicos"

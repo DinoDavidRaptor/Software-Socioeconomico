@@ -1,4 +1,4 @@
-"""
+﻿"""
 Gestor de empresas solicitantes de estudios socioeconómicos.
 Autor: DINOS Tech
 Versión: 0.3.0

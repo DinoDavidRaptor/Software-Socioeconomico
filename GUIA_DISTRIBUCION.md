@@ -1,8 +1,8 @@
-# Guia de Empaquetado y Distribucion - DINOS Tech
+﻿# Guia de Empaquetado y Distribucion - DINOS Tech
 
 ## Resumen del Sistema
 
-Este documento describe el proceso completo para compilar, proteger y distribuir Ecosistema Comercial 360.
+Este documento describe el proceso completo para compilar, proteger y distribuir SoftSE.
 
 ## Arquitectura de Proteccion
 
@@ -51,7 +51,7 @@ python build_nuitka.py
 El script:
 
 - Compila main.py y todo el paquete src/ a codigo C
-- Genera `dist/EcosistemaComercial360.exe`
+- Genera `dist/SoftSE.exe`
 - Copia archivos necesarios (config.json, etc.)
 
 **Tiempo estimado:** 5-15 minutos (primera vez)
@@ -63,13 +63,13 @@ El script:
 3. Presiona `Ctrl+F9` para compilar
 4. El instalador se genera en `installer_output/`
 
-**Resultado:** `EcosistemaComercial360_Setup_v0.3.7.exe`
+**Resultado:** `SoftSE_Setup_v0.3.7.exe`
 
 ### Paso 3: Distribuir al Cliente
 
 Envia al cliente:
 
-1. El instalador (`EcosistemaComercial360_Setup_vX.X.X.exe`)
+1. El instalador (`SoftSE_Setup_vX.X.X.exe`)
 2. Instrucciones de instalacion
 
 ---
@@ -179,7 +179,7 @@ Software-Socioeconomico/
 │   └── header.bmp           # (HEADER - crear)
 │
 └── dist/                    # Generado por Nuitka
-    └── EcosistemaComercial360.exe
+    └── SoftSE.exe
 ```
 
 ---
@@ -226,7 +226,9 @@ Software-Socioeconomico/
 ## Contacto
 
 DINOS Tech
-Email: soporte@dinostech.com
+Email: soporte@dinoraptor.tech
+Telefono: 3333010376
+Web: dinoraptor.tech/dinostech
 
 ---
 

@@ -1,6 +1,17 @@
-# Changelog - Ecosistema Comercial 360
+﻿# Changelog - SoftSE
 
 Registro de cambios y versiones del sistema de estudios socioeconomicos.
+
+---
+
+## [0.4.2] - 12 de febrero de 2026 - REBRANDING
+
+### Modificado
+
+- Renombrado el sistema de "Ecosistema Comercial 360" a "SoftSE" en todos los archivos
+- Actualizada URL de contacto a dinoraptor.tech/dinostech
+- Actualizado email de soporte a soporte@dinoraptor.tech
+- Agregado telefono de contacto 3333010376
 
 ---
 

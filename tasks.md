@@ -1,4 +1,4 @@
-# Lista de Tareas - Ecosistema Comercial 360
+﻿# Lista de Tareas - SoftSE
 
 ## Configuración Inicial
 
@@ -132,3 +132,10 @@
 - [x] Crear sistema de backup (export/import ZIP)
 - [x] Incluir estudios, fotos, config en backup
 - [x] Agregar botones de Configuracion y Backup en ventana principal
+
+## Rebranding a SoftSE (12/02/2026)
+
+- [x] Reemplazar "Ecosistema Comercial 360" por "SoftSE" en todos los archivos
+- [x] Actualizar URL de contacto a dinoraptor.tech/dinostech
+- [x] Actualizar email de soporte a soporte@dinoraptor.tech
+- [x] Agregar telefono de contacto 3333010376

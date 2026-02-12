@@ -1,4 +1,4 @@
-"""
+﻿"""
 Páginas del wizard de estudios socioeconómicos.
 Autor: DINOS Tech
 Versión: 0.3.0

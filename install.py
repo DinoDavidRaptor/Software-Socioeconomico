@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Script de instalación y verificación para Ecosistema Comercial 360.
+Script de instalación y verificación para SoftSE.
 Autor: DINOS Tech
 Versión: 0.1.0
 """
@@ -14,7 +14,7 @@ import platform
 def imprimir_banner():
     """Imprime el banner de bienvenida."""
     print("=" * 60)
-    print("  Ecosistema Comercial 360 - Sistema de Estudios")
+    print("  SoftSE - Sistema de Estudios")
     print("  DINOS Tech - Versión 0.1.0")
     print("=" * 60)
     print()

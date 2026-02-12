@@ -1,4 +1,4 @@
-"""
+﻿"""
 Generador de ID unico de hardware.
 Utilizado para vincular licencias a maquinas especificas.
 Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.
