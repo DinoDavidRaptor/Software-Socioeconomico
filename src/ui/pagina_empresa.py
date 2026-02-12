@@ -101,6 +101,7 @@ class PaginaEmpresaSolicitante(QWizardPage):
         """)
         self.cargar_empresas()
         self.combo_empresa.currentTextChanged.connect(self.on_empresa_changed)
+        self.combo_empresa.currentTextChanged.connect(self.completeChanged)
         selector_layout.addWidget(self.combo_empresa, 1)
         
         # Botón para agregar empresa
@@ -150,9 +151,6 @@ class PaginaEmpresaSolicitante(QWizardPage):
         layout.addStretch()
         
         self.setLayout(layout)
-        
-        # Registrar campo para validación
-        self.registerField("empresa_solicitante*", self.combo_empresa, "currentText")
     
     def cargar_empresas(self):
         """Carga las empresas desde el gestor."""
@@ -168,6 +166,9 @@ class PaginaEmpresaSolicitante(QWizardPage):
             # Si no hay empresa guardada, seleccionar la primera y guardarla
             self.combo_empresa.setCurrentIndex(0)
             self.estudio.datos["empresa_solicitante"] = empresas[0]
+        
+        # Emitir señal para actualizar estado del botón Next
+        self.completeChanged.emit()
     
     def agregar_nueva_empresa(self):
         """Abre el diálogo para agregar una nueva empresa."""
@@ -212,6 +213,11 @@ class PaginaEmpresaSolicitante(QWizardPage):
         elif self.combo_empresa.count() > 0:
             # Si no hay empresa guardada, usar la primera
             self.estudio.datos["empresa_solicitante"] = self.combo_empresa.currentText()
+    
+    def isComplete(self):
+        """Verifica si la página está completa para habilitar el botón Next."""
+        empresa = self.combo_empresa.currentText()
+        return bool(empresa and empresa.strip())
     
     def validatePage(self):
         """Valida que haya una empresa seleccionada antes de continuar."""

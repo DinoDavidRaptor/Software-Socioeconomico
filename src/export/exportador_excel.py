@@ -169,23 +169,25 @@ class ExportadorExcel:
                 
                 # Calcular riesgos con justificaciones
                 calc = CalculadorRiesgos(estudio)
-                resultados = calc.calcular_todos_riesgos()
+                resultados = CalculadorRiesgos.calcular_todos_riesgos(estudio)
                 
                 # Calcular porcentaje gasto/ingreso
                 sueldo = fin.get("sueldo_mensual", 0)
-                otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []))
+                otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict))
                 ingreso_total = sueldo + otros_ingresos
                 gastos_total = fin.get("gastos", {}).get("total", 0)
                 porcentaje_gasto = (gastos_total / ingreso_total * 100) if ingreso_total > 0 else 0
                 
                 # Contar enfermedades crónicas
                 enfermedades = salud.get("enfermedades_cronicas", [])
-                enfermedades_texto = ", ".join([e.get("nombre", "") for e in enfermedades]) if enfermedades else "Ninguna"
+                enfermedades_texto = ", ".join([e.get("nombre", "") for e in enfermedades]) if enfermedades and all(isinstance(e, dict) for e in enfermedades) else "Ninguna"
                 
                 # Extraer justificaciones
                 def get_justificaciones(key):
-                    if key in resultados and resultados[key]["justificaciones"]:
-                        return " | ".join(resultados[key]["justificaciones"])
+                    if key in resultados:
+                        data = resultados[key]
+                        if isinstance(data, dict) and "justificaciones" in data:
+                            return " | ".join(data["justificaciones"])
                     return ""
                 
                 # Escribir datos

@@ -22,9 +22,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# PyQt
-*.ui.autosave
+*.pyc
+.pytest_cache/
 
 # IDEs
 .vscode/
@@ -32,13 +31,18 @@ wheels/
 *.swp
 *.swo
 *~
+
+# Sistema operativo
 .DS_Store
+Thumbs.db
+desktop.ini
 
 # Datos del proyecto
 data/estudios/*.json
 data/fotos/*
 !data/estudios/.gitkeep
 !data/fotos/.gitkeep
+empresas.json
 
 # Exportaciones
 export/*
@@ -47,5 +51,47 @@ export/*
 # Logs
 *.log
 
-# Configuración local (opcional)
+# Configuracion local
 config.local.json
+*.local.*
+
+# Archivos de IA y agentes
+copilot-*.md
+claude-*.md
+agent-*.md
+AGENTS.md
+CLAUDE.md
+
+# Scripts de testing
+test-*.js
+test-*.ts
+test-*.py
+*.test.local
+*.debug
+
+# Archivos debug y temporales
+debug_files/
+*.tmp
+*.temp
+*.bak
+
+# Datos sensibles
+.env
+.env.*
+*.secret
+
+# Distribucion y compilacion
+dist/
+build/
+installer_output/
+*.exe
+*.spec
+
+# Archivos de licencia (privados)
+scripts/privado/
+license.dat
+*.lic
+
+# Assets binarios grandes (opcional - descomenta si quieres)
+# assets/installer/*.ico
+# assets/installer/*.bmp

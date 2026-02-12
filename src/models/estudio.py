@@ -39,20 +39,28 @@ class EstudioSocioeconomico:
                 "nombre_completo": "",
                 "edad": 0,
                 "fecha_nacimiento": "",
+                "genero": "",  # ⭐ NUEVO
                 "nacionalidad": "",
                 "estado_nacimiento": "",
                 "estado_civil": "",
                 "curp": "",
+                "rfc": "",  # ⭐ NUEVO
                 "ine": "",
+                "nss": "",  # ⭐ NUEVO
                 "telefono": "",
                 "email": "",
                 "direccion": "",
                 "escolaridad": "",
+                "carrera_especialidad": "",  # ⭐ NUEVO
                 "institucion_ultimo_grado": "",
+                "estado_estudios": "",  # ⭐ NUEVO
                 "certificados": "",
-                "persona_contacto_emergencia": "",
-                "telefono_emergencia": "",
+                "licencia_conducir": False,  # ⭐ NUEVO
+                "licencia_tipo": "",  # ⭐ NUEVO
+                "licencia_vigencia": "",  # ⭐ NUEVO
+                "contactos_emergencia": [],  # ⭐ NUEVO - Array de contactos
                 "antecedentes_legales": False,
+                "antecedentes_legales_detalle": "",  # ⭐ NUEVO
                 "detalle_antecedentes": "",
                 "dependencia_economica": ""
             },
@@ -87,8 +95,7 @@ class EstudioSocioeconomico:
                 "numero_hijos_menores": 0,  # ⭐ NUEVO - Menores de 18
                 "numero_hijos_estudiando": 0,  # ⭐ NUEVO
                 "gasto_mensual_educacion_hijos": 0.0,  # ⭐ NUEVO
-                "miembros_hogar": [],  # Lista de {nombre, edad, parentesco, estudia_trabaja, aporta_ingreso, 
-                                       #           enfermedades_cronicas, dependencia_tipo, ingreso}
+                "miembros_hogar": [],  # Lista de {nombre, edad, parentesco, ocupacion, ingreso, es_dependiente}  # ⭐ NUEVO - Agregado es_dependiente
                 "total_miembros_hogar": 0,  # ⭐ NUEVO - Contador
                 "miembros_trabajando": 0,  # ⭐ NUEVO
                 "miembros_estudiando": 0,  # ⭐ NUEVO
@@ -104,6 +111,8 @@ class EstudioSocioeconomico:
             # Sección 4: Situación Financiera (Expandida)
             "situacion_financiera": {
                 "trabaja_actualmente": True,
+                "empresa_actual": "",  # ⭐ NUEVO
+                "puesto_actual": "",  # ⭐ NUEVO
                 "sueldo_mensual": 0.0,
                 "otros_ingresos": [],  # Lista de {fuente, monto, frecuencia}
                 "ingreso_total_mensual": 0.0,  # Calculado automáticamente
@@ -222,7 +231,9 @@ class EstudioSocioeconomico:
             # Sección 6: Empleo Actual (Detallado)
             "empleo_actual": {
                 "empresa": "",
+                "empresa_actual": "",  # ⭐ NUEVO
                 "puesto": "",
+                "puesto_actual": "",  # ⭐ NUEVO
                 "antiguedad": "",
                 "antiguedad_meses": 0,  # ⭐ NUEVO - En meses para cálculos
                 "tipo_contrato": "",
@@ -239,12 +250,16 @@ class EstudioSocioeconomico:
                 "costo_mensual_transporte": 0.0,  # ⭐ NUEVO
                 "tiene_home_office": False,  # ⭐ NUEVO
                 "dias_home_office_semana": 0,  # ⭐ NUEVO
+                "jefe_inmediato": "",  # ⭐ NUEVO
+                "telefono_empresa": "",  # ⭐ NUEVO
+                "satisfaccion_laboral": "",  # ⭐ NUEVO
                 "plan_carrera": "",
                 "oportunidades_ascenso": "",  # ⭐ NUEVO
                 "ultima_evaluacion_desempeno": "",  # ⭐ NUEVO
                 "calificacion_ultima_evaluacion": 0.0,  # ⭐ NUEVO - De 1 a 10
                 "recibe_bonos": False,  # ⭐ NUEVO
-                "monto_promedio_bonos_anuales": 0.0  # ⭐ NUEVO
+                "monto_promedio_bonos_anuales": 0.0,  # ⭐ NUEVO
+                "observaciones_empleo": ""  # ⭐ NUEVO
             },
             
             # Sección 7: Historial Laboral (Profundo)
@@ -317,6 +332,88 @@ class EstudioSocioeconomico:
                 "contradicciones": [],
                 "dependientes_sin_ingreso_detectado": False,
                 "discrepancia_ingresos": False
+            },
+            
+            # ============================================
+            # SECCIONES INSTITUCIONALES v0.3.2
+            # ============================================
+            
+            # Seccion 11: Validacion Documental
+            "validacion_documental": {
+                "ine_verificada": False,
+                "ine_observaciones": "",
+                "curp_validada": False,
+                "curp_observaciones": "",
+                "rfc_validado_sat": False,
+                "rfc_observaciones": "",
+                "nss_validado_imss": False,
+                "nss_observaciones": "",
+                "comprobante_domicilio_verificado": False,
+                "comprobante_domicilio_tipo": "",  # Recibo luz, agua, etc.
+                "comprobante_domicilio_fecha": "",
+                "recibo_nomina_verificado": False,
+                "recibo_nomina_periodo": "",
+                "constancia_laboral_verificada": False,
+                "estados_cuenta_verificados": False,
+                "estados_cuenta_meses": 0,
+                "documentacion_completa": False,
+                "observaciones_documentacion": ""
+            },
+            
+            # Seccion 12: Investigacion Vecinal
+            "investigacion_vecinal": {
+                "visita_domiciliaria_realizada": False,
+                "fecha_visita": "",
+                "hora_visita": "",
+                "persona_atendio": "",
+                "parentesco_persona_atendio": "",
+                "vecino_entrevistado": False,
+                "vecino_nombre": "",
+                "vecino_direccion": "",
+                "vecino_tiempo_conocerlo": "",
+                "vecino_opinion_comportamiento": "",  # Bueno/Regular/Malo
+                "vecino_comentarios": "",
+                "tiempo_residencia_confirmado": False,
+                "tiempo_residencia_segun_vecino": "",
+                "arrendador_contactado": False,
+                "arrendador_nombre": "",
+                "arrendador_telefono": "",
+                "arrendador_opinion": "",
+                "arrendador_historial_pagos": "",  # Puntual/Irregular/Moroso
+                "condiciones_vivienda_observadas": "",
+                "ambiente_familiar_observado": "",  # Estable/Conflictivo/No observado
+                "observaciones_investigacion": ""
+            },
+            
+            # Seccion 13: Analisis Cualitativo
+            "analisis_cualitativo": {
+                "estabilidad_emocional": "",  # Estable/Inestable/No evaluado
+                "estabilidad_emocional_observaciones": "",
+                "perfil_responsabilidad": "",  # Alto/Medio/Bajo
+                "responsabilidad_indicadores": "",
+                "congruencia_nivel_vida_ingresos": "",  # Congruente/Incongruente/Dudoso
+                "congruencia_observaciones": "",
+                "riesgo_reputacional": "",  # Bajo/Medio/Alto
+                "riesgo_reputacional_motivo": "",
+                "nivel_arraigo": "",  # Alto/Medio/Bajo
+                "arraigo_indicadores": "",  # Propiedad, familia, tiempo residencia
+                "actitud_entrevista": "",  # Cooperativa/Evasiva/Hostil
+                "coherencia_respuestas": "",  # Alta/Media/Baja
+                "observaciones_cualitativas": ""
+            },
+            
+            # Seccion 14: Datos del Investigador y Firma
+            "investigador": {
+                "nombre_investigador": "",
+                "cedula_profesional": "",
+                "empresa_investigadora": "",
+                "telefono_investigador": "",
+                "email_investigador": "",
+                "fecha_elaboracion": "",
+                "lugar_elaboracion": "",
+                "declaracion_veracidad": False,
+                "firma_digital": "",  # Puede ser ruta a imagen de firma
+                "observaciones_finales": ""
             }
         }
     
@@ -438,9 +535,10 @@ class EstudioSocioeconomico:
             if estudio:
                 # Eliminar fotografías asociadas
                 for foto in estudio.datos.get("fotos", []):
-                    ruta_foto = foto.get("archivo", "")
-                    if ruta_foto and os.path.exists(ruta_foto):
-                        os.remove(ruta_foto)
+                    if isinstance(foto, dict):
+                        ruta_foto = foto.get("archivo", "")
+                        if ruta_foto and os.path.exists(ruta_foto):
+                            os.remove(ruta_foto)
             
             # Eliminar archivo JSON
             archivo = os.path.join(ruta_base, f"{id_estudio}.json")

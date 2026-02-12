@@ -1,7 +1,7 @@
 """
 Ventana principal del sistema de estudios socioeconómicos.
 Autor: DINOS Tech
-Versión: 0.1.0
+Versión: 0.4.0
 """
 
 import sys
@@ -10,7 +10,7 @@ import json
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QTableWidget, QTableWidgetItem, QLabel, QMessageBox, QFileDialog,
-    QHeaderView, QDialog
+    QHeaderView, QDialog, QMenuBar, QMenu, QAction
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QFont, QIcon
@@ -18,6 +18,8 @@ from src.models.estudio import EstudioSocioeconomico
 from src.logic.calculador_riesgos import CalculadorRiesgos
 from src.ui.wizard_estudio import WizardEstudio
 from src.ui.dialogo_info_ia import DialogoInfoIA
+from src.ui.dialogo_configuracion import DialogoConfiguracion
+from src.ui.dialogo_backup import DialogoBackup
 from src.export.exportador_pdf import ExportadorPDF
 from src.export.exportador_word import ExportadorWord
 from src.export.exportador_excel import ExportadorExcel
@@ -99,6 +101,41 @@ class VentanaPrincipal(QMainWindow):
         
         header_layout.addLayout(info_layout)
         header_layout.addStretch()
+        
+        # Botones de configuracion y backup (lado derecho del header)
+        config_buttons_layout = QVBoxLayout()
+        
+        btn_configuracion = QPushButton("Configuracion")
+        btn_configuracion.setStyleSheet("""
+            QPushButton {
+                background-color: #95a5a6;
+                color: white;
+                padding: 8px 15px;
+                font-size: 11px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover { background-color: #7f8c8d; }
+        """)
+        btn_configuracion.clicked.connect(self.abrir_configuracion)
+        config_buttons_layout.addWidget(btn_configuracion)
+        
+        btn_backup = QPushButton("Backup")
+        btn_backup.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                padding: 8px 15px;
+                font-size: 11px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover { background-color: #2c3e50; }
+        """)
+        btn_backup.clicked.connect(self.abrir_backup)
+        config_buttons_layout.addWidget(btn_backup)
+        
+        header_layout.addLayout(config_buttons_layout)
         
         main_layout.addLayout(header_layout)
         
@@ -271,8 +308,15 @@ class VentanaPrincipal(QMainWindow):
             self.tabla.setItem(row, 2, QTableWidgetItem(fecha_mod))
             
             # Riesgo global con color
-            riesgo = estudio['riesgo_global']
-            riesgo_item = QTableWidgetItem(f"{riesgo:.1f} - {CalculadorRiesgos.obtener_interpretacion_riesgo(riesgo)}")
+            riesgo_raw = estudio.get('riesgo_global', 1)
+            # Handle case where riesgo_global is a dict instead of a number
+            if isinstance(riesgo_raw, dict):
+                riesgo = riesgo_raw.get('nivel', 1) if isinstance(riesgo_raw.get('nivel'), (int, float)) else 1
+            elif isinstance(riesgo_raw, (int, float)):
+                riesgo = float(riesgo_raw)
+            else:
+                riesgo = 1
+            riesgo_item = QTableWidgetItem(f"{riesgo:.1f} - {CalculadorRiesgos.obtener_interpretacion_riesgo(int(riesgo))}")
             riesgo_item.setTextAlignment(Qt.AlignCenter)
             
             # Colorear según riesgo
@@ -450,3 +494,26 @@ class VentanaPrincipal(QMainWindow):
                     f"Se incluyeron {len(estudios_datos)} estudio(s)")
             else:
                 QMessageBox.critical(self, "Error", "No se pudo exportar el Excel")
+    
+    def abrir_configuracion(self):
+        """Abre el dialogo de configuracion de empresa."""
+        dialogo = DialogoConfiguracion(self)
+        if dialogo.exec_() and dialogo.cambios_guardados:
+            # Recargar configuracion
+            self.config_empresa = self.cargar_configuracion()
+            # Notificar al usuario
+            QMessageBox.information(
+                self,
+                "Configuracion",
+                "Los cambios se aplicaran completamente al reiniciar la aplicacion."
+            )
+    
+    def abrir_backup(self):
+        """Abre el dialogo de gestion de backups."""
+        dialogo = DialogoBackup(self)
+        dialogo.exec_()
+        
+        # Si se importo un backup, recargar estudios
+        if dialogo.backup_importado:
+            self.cargar_estudios()
+            self.statusBar().showMessage("Estudios actualizados desde backup")

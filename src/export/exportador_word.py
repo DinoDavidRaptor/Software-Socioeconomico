@@ -444,7 +444,7 @@ class ExportadorWord:
         calc = CalculadorRiesgos(datos)
         
         # Calcular todos los riesgos con justificaciones
-        resultados = calc.calcular_todos_riesgos()
+        resultados = CalculadorRiesgos.calcular_todos_riesgos(datos)
         
         # Tabla resumen de riesgos
         riesgos_data = []

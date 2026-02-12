@@ -2,6 +2,7 @@
 Páginas del wizard - Parte 2
 Continúa las clases de páginas para el asistente.
 Autor: DINOS Tech
+Versión: 0.3.0
 """
 
 from PyQt5.QtWidgets import (
@@ -38,7 +39,7 @@ class PaginaSituacionFinanciera(QWizardPage):
         main_layout = QVBoxLayout()
         content_widget.setLayout(main_layout)
         
-        self.setSubTitle("Información laboral, ingresos y gastos del candidato.")
+        self.setSubTitle("Información laboral, ingresos, gastos, préstamos y deudas del candidato.")
         
         # Empleo actual
         grupo_empleo = QGroupBox("Empleo Actual")
@@ -77,6 +78,7 @@ class PaginaSituacionFinanciera(QWizardPage):
             ('alimentacion', 'Alimentación'),
             ('salud', 'Salud'),
             ('educacion', 'Educación'),
+            ('recreacion', 'Recreación y entretenimiento'),
             ('vivienda', 'Vivienda (renta/mantenimiento)'),
             ('transporte', 'Transporte'),
             ('servicios', 'Servicios (luz, agua, gas, etc.)'),
@@ -99,6 +101,62 @@ class PaginaSituacionFinanciera(QWizardPage):
         
         grupo_gastos.setLayout(gastos_layout)
         main_layout.addWidget(grupo_gastos)
+        
+        # Préstamos y Deudas
+        grupo_prestamos = QGroupBox("Préstamos y Deudas")
+        prestamos_layout = QFormLayout()
+        
+        self.campos['tiene_prestamos_personales'] = QCheckBox("Sí tiene préstamos personales")
+        prestamos_layout.addRow("Préstamos Personales:", self.campos['tiene_prestamos_personales'])
+        
+        self.campos['monto_prestamos_personales'] = QDoubleSpinBox()
+        self.campos['monto_prestamos_personales'].setRange(0, 99999999)
+        self.campos['monto_prestamos_personales'].setPrefix("$ ")
+        self.campos['monto_prestamos_personales'].setDecimals(2)
+        prestamos_layout.addRow("Monto Préstamos Personales:", self.campos['monto_prestamos_personales'])
+        
+        self.campos['tiene_prestamo_hipotecario'] = QCheckBox("Sí tiene hipoteca")
+        prestamos_layout.addRow("Hipoteca:", self.campos['tiene_prestamo_hipotecario'])
+        
+        self.campos['monto_hipoteca'] = QDoubleSpinBox()
+        self.campos['monto_hipoteca'].setRange(0, 99999999)
+        self.campos['monto_hipoteca'].setPrefix("$ ")
+        self.campos['monto_hipoteca'].setDecimals(2)
+        prestamos_layout.addRow("Monto Hipoteca:", self.campos['monto_hipoteca'])
+        
+        self.campos['pago_mensual_hipoteca'] = QDoubleSpinBox()
+        self.campos['pago_mensual_hipoteca'].setRange(0, 999999)
+        self.campos['pago_mensual_hipoteca'].setPrefix("$ ")
+        self.campos['pago_mensual_hipoteca'].setDecimals(2)
+        prestamos_layout.addRow("Pago Mensual Hipoteca:", self.campos['pago_mensual_hipoteca'])
+        
+        self.campos['tiene_prestamo_auto'] = QCheckBox("Sí tiene préstamo de auto")
+        prestamos_layout.addRow("Préstamo de Auto:", self.campos['tiene_prestamo_auto'])
+        
+        self.campos['monto_prestamo_auto'] = QDoubleSpinBox()
+        self.campos['monto_prestamo_auto'].setRange(0, 99999999)
+        self.campos['monto_prestamo_auto'].setPrefix("$ ")
+        self.campos['monto_prestamo_auto'].setDecimals(2)
+        prestamos_layout.addRow("Monto Préstamo Auto:", self.campos['monto_prestamo_auto'])
+        
+        self.campos['pago_mensual_auto'] = QDoubleSpinBox()
+        self.campos['pago_mensual_auto'].setRange(0, 999999)
+        self.campos['pago_mensual_auto'].setPrefix("$ ")
+        self.campos['pago_mensual_auto'].setDecimals(2)
+        prestamos_layout.addRow("Pago Mensual Auto:", self.campos['pago_mensual_auto'])
+        
+        # Total deudas
+        self.campos['total_deudas'] = QLabel("$0.00")
+        self.campos['total_deudas'].setStyleSheet("font-weight: bold; font-size: 13px; color: #e74c3c;")
+        prestamos_layout.addRow("<b>Total Deudas:</b>", self.campos['total_deudas'])
+        
+        # Total pagos mensuales de deudas
+        self.campos['total_pagos_mensuales_deudas'] = QLabel("$0.00")
+        self.campos['total_pagos_mensuales_deudas'].setStyleSheet("font-weight: bold; font-size: 13px;")
+        prestamos_layout.addRow("<b>Pagos Mensuales Deudas:</b>", self.campos['total_pagos_mensuales_deudas'])
+        
+        grupo_prestamos.setLayout(prestamos_layout)
+        main_layout.addWidget(grupo_prestamos)
         
         # Balance
         balance_layout = QHBoxLayout()
@@ -132,14 +190,34 @@ class PaginaSituacionFinanciera(QWizardPage):
         """Calcula los totales de gastos y balance."""
         # Calcular total de gastos
         total_gastos = 0
-        for key in ['alimentacion', 'salud', 'educacion', 'vivienda', 'transporte', 'servicios', 'otros']:
+        for key in ['alimentacion', 'salud', 'educacion', 'recreacion', 'vivienda', 'transporte', 'servicios', 'otros']:
             total_gastos += self.campos[f'gasto_{key}'].value()
         
         self.campos['total_gastos'].setText(f"${total_gastos:,.2f}")
         
-        # Calcular balance
+        # Calcular total de deudas
+        total_deudas = 0
+        if self.campos['tiene_prestamos_personales'].isChecked():
+            total_deudas += self.campos['monto_prestamos_personales'].value()
+        if self.campos['tiene_prestamo_hipotecario'].isChecked():
+            total_deudas += self.campos['monto_hipoteca'].value()
+        if self.campos['tiene_prestamo_auto'].isChecked():
+            total_deudas += self.campos['monto_prestamo_auto'].value()
+        
+        self.campos['total_deudas'].setText(f"${total_deudas:,.2f}")
+        
+        # Calcular total pagos mensuales de deudas
+        total_pagos_deudas = 0
+        if self.campos['tiene_prestamo_hipotecario'].isChecked():
+            total_pagos_deudas += self.campos['pago_mensual_hipoteca'].value()
+        if self.campos['tiene_prestamo_auto'].isChecked():
+            total_pagos_deudas += self.campos['pago_mensual_auto'].value()
+        
+        self.campos['total_pagos_mensuales_deudas'].setText(f"${total_pagos_deudas:,.2f}")
+        
+        # Calcular balance (considerando gastos + pagos de deudas)
         sueldo = self.campos['sueldo_mensual'].value()
-        balance = sueldo - total_gastos
+        balance = sueldo - total_gastos - total_pagos_deudas
         
         self.campos['balance'].setText(f"${balance:,.2f}")
         
@@ -161,13 +239,34 @@ class PaginaSituacionFinanciera(QWizardPage):
         
         # Gastos
         gastos = {}
-        for key in ['alimentacion', 'salud', 'educacion', 'vivienda', 'transporte', 'servicios', 'otros']:
+        for key in ['alimentacion', 'salud', 'educacion', 'recreacion', 'vivienda', 'transporte', 'servicios', 'otros']:
             gastos[key] = self.campos[f'gasto_{key}'].value()
         
         gastos['total'] = sum(gastos.values())
         fin['gastos'] = gastos
         
-        fin['balance'] = self.campos['sueldo_mensual'].value() - gastos['total']
+        # Préstamos y deudas
+        fin['tiene_prestamos_personales'] = self.campos['tiene_prestamos_personales'].isChecked()
+        fin['monto_prestamos_personales'] = self.campos['monto_prestamos_personales'].value()
+        fin['tiene_prestamo_hipotecario'] = self.campos['tiene_prestamo_hipotecario'].isChecked()
+        fin['monto_hipoteca'] = self.campos['monto_hipoteca'].value()
+        fin['pago_mensual_hipoteca'] = self.campos['pago_mensual_hipoteca'].value()
+        fin['tiene_prestamo_auto'] = self.campos['tiene_prestamo_auto'].isChecked()
+        fin['monto_prestamo_auto'] = self.campos['monto_prestamo_auto'].value()
+        fin['pago_mensual_auto'] = self.campos['pago_mensual_auto'].value()
+        
+        # Calcular totales
+        total_deudas = 0
+        if fin['tiene_prestamos_personales']:
+            total_deudas += fin['monto_prestamos_personales']
+        if fin['tiene_prestamo_hipotecario']:
+            total_deudas += fin['monto_hipoteca']
+        if fin['tiene_prestamo_auto']:
+            total_deudas += fin['monto_prestamo_auto']
+        
+        fin['total_deudas'] = total_deudas
+        fin['total_pagos_mensuales_deudas'] = fin['pago_mensual_hipoteca'] + fin['pago_mensual_auto']
+        fin['balance'] = fin['sueldo_mensual'] - gastos['total'] - fin['total_pagos_mensuales_deudas']
         fin['observaciones_financieras'] = self.campos['observaciones_financieras'].toPlainText()
     
     def cargar_datos(self):
@@ -181,8 +280,17 @@ class PaginaSituacionFinanciera(QWizardPage):
         self.campos['horario'].setText(fin.get('horario', ''))
         
         gastos = fin.get('gastos', {})
-        for key in ['alimentacion', 'salud', 'educacion', 'vivienda', 'transporte', 'servicios', 'otros']:
+        for key in ['alimentacion', 'salud', 'educacion', 'recreacion', 'vivienda', 'transporte', 'servicios', 'otros']:
             self.campos[f'gasto_{key}'].setValue(gastos.get(key, 0))
+        
+        self.campos['tiene_prestamos_personales'].setChecked(fin.get('tiene_prestamos_personales', False))
+        self.campos['monto_prestamos_personales'].setValue(fin.get('monto_prestamos_personales', 0))
+        self.campos['tiene_prestamo_hipotecario'].setChecked(fin.get('tiene_prestamo_hipotecario', False))
+        self.campos['monto_hipoteca'].setValue(fin.get('monto_hipoteca', 0))
+        self.campos['pago_mensual_hipoteca'].setValue(fin.get('pago_mensual_hipoteca', 0))
+        self.campos['tiene_prestamo_auto'].setChecked(fin.get('tiene_prestamo_auto', False))
+        self.campos['monto_prestamo_auto'].setValue(fin.get('monto_prestamo_auto', 0))
+        self.campos['pago_mensual_auto'].setValue(fin.get('pago_mensual_auto', 0))
         
         self.campos['observaciones_financieras'].setPlainText(fin.get('observaciones_financieras', ''))
         
@@ -399,6 +507,3 @@ class PaginaVivienda(QWizardPage):
             spinbox.setValue(vehiculos.get(key, 0))
         
         self.campos['otras_propiedades'].setPlainText(viv.get('otras_propiedades', ''))
-
-
-# Debido a la extensión, creo las páginas restantes de forma simplificada...

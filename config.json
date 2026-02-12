@@ -1,9 +1,9 @@
 {
   "empresa": {
-    "nombre": "DINOS Tech",
-    "direccion": "Av. Principal #123, Colonia Centro, CP 12345",
-    "telefono": "+52 (55) 1234-5678",
-    "email": "contacto@dinostech.com",
-    "logo": "assets/logo.png"
+    "nombre": "Human Connection",
+    "direccion": "Sin dirección",
+    "telefono": "+52 (33) 1473-2349",
+    "email": "rcastaneda@humanconnection.mx",
+    "logo": "assets/hc.png"
   }
 }

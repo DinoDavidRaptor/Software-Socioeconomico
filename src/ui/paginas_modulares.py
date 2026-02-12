@@ -201,6 +201,188 @@ class PaginaEstiloVidaModular(PaginaBaseModular):
         )
 
 
+class PaginaValidacionDocumentalModular(PaginaBaseModular):
+    """
+    Pagina: Validacion Documental (Modular)
+    Para agregar campos: editar ConfiguracionCampos.obtener_campos_validacion_documental()
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Validacion Documental",
+            "validacion_documental"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_validacion_documental()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Registro de verificacion de documentos oficiales. "
+                     "Marque los documentos verificados y agregue observaciones."
+        )
+
+
+class PaginaInvestigacionVecinalModular(PaginaBaseModular):
+    """
+    Pagina: Investigacion Vecinal (Modular)
+    Para agregar campos: editar ConfiguracionCampos.obtener_campos_investigacion_vecinal()
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Investigacion Vecinal",
+            "investigacion_vecinal"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_investigacion_vecinal()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Datos de la visita domiciliaria e investigacion con vecinos. "
+                     "Complete esta seccion despues de realizar la visita de campo."
+        )
+
+
+class PaginaAnalisisCualitativoModular(PaginaBaseModular):
+    """
+    Pagina: Analisis Cualitativo (Modular)
+    Para agregar campos: editar ConfiguracionCampos.obtener_campos_analisis_cualitativo()
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Analisis Cualitativo",
+            "analisis_cualitativo"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_analisis_cualitativo()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Evaluacion cualitativa del candidato basada en observaciones. "
+                     "Incluye estabilidad emocional, responsabilidad y arraigo."
+        )
+
+
+class PaginaInvestigadorModular(PaginaBaseModular):
+    """
+    Pagina: Datos del Investigador (Modular)
+    Para agregar campos: editar ConfiguracionCampos.obtener_campos_investigador()
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Datos del Investigador",
+            "investigador"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_investigador()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Informacion del investigador que realiza el estudio. "
+                     "Estos datos apareceran en el PDF final para validacion."
+        )
+
+
+class PaginaInformacionFamiliarModular(PaginaBaseModular):
+    """
+    Pagina: Informacion Familiar Adicional (Modular)
+    Campos complementarios a la tabla de miembros del hogar.
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Informacion Familiar Adicional",
+            "informacion_familiar"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_informacion_familiar()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Informacion adicional sobre la composicion familiar. "
+                     "Completa los datos de hijos, dependientes y miembros del hogar."
+        )
+
+
+class PaginaSituacionFinancieraModular(PaginaBaseModular):
+    """
+    Pagina: Situacion Financiera Completa (Modular)
+    Incluye todos los campos financieros del PDF.
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Situacion Financiera Detallada",
+            "situacion_financiera"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_situacion_financiera()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Informacion financiera detallada: ingresos, ahorros, deudas, "
+                     "tarjetas de credito, prestamos y gastos adicionales."
+        )
+
+
+class PaginaViviendaModular(PaginaBaseModular):
+    """
+    Pagina: Vivienda Completa (Modular)
+    Incluye todos los campos de vivienda del PDF.
+    """
+    
+    def __init__(self, estudio):
+        super().__init__(
+            estudio,
+            "Vivienda Detallada",
+            "vivienda"
+        )
+        self.init_ui()
+        self.cargar_datos()
+    
+    def init_ui(self):
+        """Inicializa la interfaz automaticamente."""
+        campos = ConfiguracionCampos.obtener_campos_vivienda()
+        
+        self.crear_formulario_desde_config(
+            campos,
+            subtitulo="Detalles completos de la vivienda: tipo, tenencia, dimensiones, "
+                     "condiciones, valor estimado y seguridad del entorno."
+        )
+
+
 # ============================================================================
 # GUÍA PARA AGREGAR NUEVAS PREGUNTAS O CAMPOS
 # ============================================================================

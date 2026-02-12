@@ -1,11 +1,14 @@
 """
-Sistema de Estudios Socioeconómicos - Ecosistema Comercial 360
+Sistema de Estudios Socioeconomicos - Ecosistema Comercial 360
 Autor: DINOS Tech
-Versión: 0.1.0
-Fecha: 9 de diciembre de 2025
+Version: 0.3.7
+Fecha: 12 de febrero de 2026
 
-Este sistema permite crear, gestionar y analizar estudios socioeconómicos completos
-con capacidades de exportación a PDF, Word y Excel.
+Este sistema permite crear, gestionar y analizar estudios socioeconomicos completos
+con capacidades de exportacion a PDF, Word y Excel.
+
+Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.
+Uso sujeto a licencia. Prohibida la copia o distribucion no autorizada.
 """
 
 import sys
@@ -13,6 +16,46 @@ import os
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtGui import QIcon
 from src.ui.ventana_principal import VentanaPrincipal
+
+
+# Ruta al archivo de licencia
+LICENSE_FILE = "license.dat"
+
+
+def verificar_licencia(app: QApplication) -> bool:
+    """
+    Verifica la licencia del software.
+    Si no es valida, muestra dialogo de activacion.
+    
+    Returns:
+        bool: True si la licencia es valida, False si el usuario cancela
+    """
+    from src.licensing import LicenseValidator
+    from src.ui.dialogo_activacion import DialogoActivacion
+    
+    validator = LicenseValidator(LICENSE_FILE)
+    is_valid, message = validator.validate()
+    
+    if is_valid:
+        # Licencia valida
+        license_info = validator.get_license_info()
+        print(f"Licencia valida: {message}")
+        return True
+    else:
+        # Mostrar dialogo de activacion
+        print(f"Licencia no valida: {message}")
+        dialogo = DialogoActivacion(license_file=LICENSE_FILE)
+        
+        if dialogo.exec_() and dialogo.activated:
+            return True
+        else:
+            QMessageBox.warning(
+                None,
+                "Licencia Requerida",
+                "Este software requiere una licencia valida para funcionar.\n\n"
+                "Contacte a DINOS Tech para obtener su licencia."
+            )
+            return False
 
 
 def verificar_estructura_directorios():
@@ -59,7 +102,7 @@ def verificar_dependencias():
             "\n".join(f"- {m}" for m in modulos_faltantes) +
             "\n\nPor favor, instálelas ejecutando:\n" +
             "pip install -r requirements.txt"
-        )
+        ) 
         print(mensaje)
         return False
     
@@ -79,7 +122,7 @@ def main():
     # Verificar estructura de directorios
     verificar_estructura_directorios()
     
-    # Crear aplicación Qt
+    # Crear aplicacion Qt
     app = QApplication(sys.argv)
     app.setApplicationName("Ecosistema Comercial 360")
     app.setOrganizationName("DINOS Tech")
@@ -87,6 +130,10 @@ def main():
     
     # Establecer estilo
     app.setStyle('Fusion')
+    
+    # Verificar licencia antes de continuar
+    if not verificar_licencia(app):
+        sys.exit(0)
     
     # Crear y mostrar ventana principal
     try:

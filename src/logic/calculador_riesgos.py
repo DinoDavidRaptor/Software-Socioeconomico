@@ -24,9 +24,13 @@ class CalculadorRiesgos:
         fin = datos.get("situacion_financiera", {})
         justificaciones = []
         
-        sueldo = fin.get("sueldo_mensual", 0)
-        otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []))
-        ingreso_total = sueldo + otros_ingresos
+        # Usar ingreso_total_mensual si está disponible, sino calcularlo
+        ingreso_total = fin.get("ingreso_total_mensual", 0)
+        if ingreso_total <= 0:
+            # Calcular desde componentes
+            sueldo = fin.get("sueldo_mensual", 0)
+            otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict))
+            ingreso_total = sueldo + otros_ingresos
         
         if ingreso_total <= 0:
             justificaciones.append("Sin ingresos reportados")
@@ -34,11 +38,53 @@ class CalculadorRiesgos:
         
         gastos_totales = fin.get("gastos", {}).get("total", 0)
         balance = fin.get("balance", 0)
-        deudas = fin.get("deudas", [])
-        ahorros = fin.get("ahorros", 0)
+        # BUG 5 FIX: Use monto_ahorros_mensuales instead of ahorros
+        ahorros = fin.get("monto_ahorros_mensuales", fin.get("ahorros", 0))
         
-        num_deudas = len(deudas)
-        monto_deudas = sum(d.get("monto", 0) for d in deudas)
+        # BUG 3 & 10 FIX: Properly aggregate all debts
+        # First check if total_deudas is already calculated
+        total_deudas = fin.get("total_deudas", 0)
+        if total_deudas <= 0:
+            # Aggregate from all debt sources
+            deuda_tarjetas = fin.get("deuda_tarjetas_total", 0)
+            prestamos_personales = fin.get("monto_prestamos_personales", 0)
+            hipoteca = fin.get("monto_hipoteca", 0)
+            prestamo_auto = fin.get("monto_prestamo_auto", 0)
+            total_deudas = deuda_tarjetas + prestamos_personales + hipoteca + prestamo_auto
+        
+        # Manejar tanto deudas como lista como string
+        deudas_raw = fin.get("deudas", [])
+        if isinstance(deudas_raw, str):
+            # BUG 10 FIX: Check for actual debt amounts in other fields
+            if total_deudas > 0:
+                # Count based on actual debt entries if available
+                num_deudas = 0
+                if fin.get("deuda_tarjetas_total", 0) > 0:
+                    num_deudas += 1
+                if fin.get("tiene_prestamos_personales") and fin.get("monto_prestamos_personales", 0) > 0:
+                    num_deudas += 1
+                if fin.get("tiene_prestamo_hipotecario") and fin.get("monto_hipoteca", 0) > 0:
+                    num_deudas += 1
+                if fin.get("tiene_prestamo_auto") and fin.get("monto_prestamo_auto", 0) > 0:
+                    num_deudas += 1
+                # If still no count but total_deudas > 0, count as 1
+                if num_deudas == 0:
+                    num_deudas = 1
+                monto_deudas = total_deudas
+            else:
+                # Fallback: check if string has content
+                num_deudas = 1 if deudas_raw.strip() and deudas_raw.strip().lower() not in ['none', 'n/a', ''] else 0
+                monto_deudas = 0
+        elif isinstance(deudas_raw, list):
+            num_deudas = len(deudas_raw)
+            monto_deudas = sum(d.get("monto", 0) for d in deudas_raw if isinstance(d, dict))
+            # Also add other debt sources if not already included
+            if total_deudas > monto_deudas:
+                monto_deudas = total_deudas
+        else:
+            num_deudas = 0
+            monto_deudas = total_deudas
+        
         porcentaje_gastos = (gastos_totales / ingreso_total) * 100 if ingreso_total > 0 else 0
         
         riesgo = 1
@@ -112,19 +158,24 @@ class CalculadorRiesgos:
         dependientes_sin_ingreso = fam.get("dependientes_sin_ingreso", 0)
         
         # Contar aportantes
-        aportantes = sum(1 for m in miembros if m.get("aporta_ingreso", False) or m.get("ingreso", 0) > 0)
+        aportantes = sum(1 for m in miembros if isinstance(m, dict) and (m.get("aporta_ingreso", False) or m.get("ingreso", 0) > 0))
         
         # Contar miembros con enfermedades crónicas
-        con_enfermedades = sum(1 for m in miembros if m.get("enfermedades_cronicas", "").strip())
+        con_enfermedades = sum(1 for m in miembros if isinstance(m, dict) and m.get("enfermedades_cronicas", "").strip())
         
         # Contar dependencia total
-        dependencia_total = sum(1 for m in miembros if m.get("dependencia_tipo", "") == "total")
+        dependencia_total = sum(1 for m in miembros if isinstance(m, dict) and m.get("dependencia_tipo", "") == "total")
         
-        ingreso_total = fin.get("sueldo_mensual", 0) + sum(
-            ing.get("monto", 0) for ing in fin.get("otros_ingresos", [])
-        )
-        
-        ingreso_per_capita = ingreso_total / max(1, num_miembros) if num_miembros > 0 else ingreso_total
+        # BUG 6 FIX: Use pre-calculated ingreso_per_capita from JSON instead of recalculating
+        ingreso_per_capita = fam.get("ingreso_per_capita", 0)
+        if ingreso_per_capita <= 0:
+            # Fallback calculation only if not available
+            ingreso_total = fin.get("sueldo_mensual", 0) + sum(
+                ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict)
+            )
+            ingreso_per_capita = ingreso_total / max(1, num_miembros) if num_miembros > 0 else ingreso_total
+        else:
+            ingreso_total = fam.get("ingreso_familiar_total", 0)
         
         riesgo = 1
         
@@ -479,14 +530,19 @@ class CalculadorRiesgos:
         justificaciones = []
         riesgo = 1
         
-        # Enfermedades crónicas
+        # BUG 2 FIX: Use numero_enfermedades_cronicas field directly, not count string
         enfermedades = salud.get("enfermedades_cronicas", [])
-        if enfermedades:
+        if isinstance(enfermedades, list):
             num_enf = len(enfermedades)
+        else:
+            # If it's a string, use the pre-calculated count field
+            num_enf = salud.get("numero_enfermedades_cronicas", 0)
+        
+        if num_enf > 0:
             riesgo = min(5, 2 + num_enf)
             justificaciones.append(f"{num_enf} enfermedad(es) crónica(s) reportada(s)")
             
-            sin_tratamiento = [e for e in enfermedades if not e.get("tratamiento")]
+            sin_tratamiento = [e for e in enfermedades if isinstance(e, dict) and not e.get("tratamiento")]
             if sin_tratamiento:
                 riesgo = min(5, riesgo + 1)
                 justificaciones.append(f"{len(sin_tratamiento)} enfermedad(es) sin tratamiento")
@@ -526,29 +582,67 @@ class CalculadorRiesgos:
     def calcular_riesgo_estilo_vida(datos: Dict) -> Tuple[int, List[str]]:
         """Calcula el riesgo relacionado con estilo de vida."""
         estilo = datos.get("estilo_vida", {})
+        vivienda = datos.get("vivienda", {})
+        salud = datos.get("salud_intereses", {})
         justificaciones = []
         riesgo = 1
         
-        # Vehículo propio (indicador de estabilidad)
-        if not estilo.get("vehiculo_propio"):
+        # BUG FIX: Verificar vehículo en vivienda.vehiculos o vivienda.tiene_vehiculos
+        tiene_vehiculo = vivienda.get("tiene_vehiculos", False)
+        if not tiene_vehiculo:
+            vehiculos = vivienda.get("vehiculos", {})
+            if isinstance(vehiculos, dict):
+                tiene_vehiculo = any(v > 0 for v in vehiculos.values() if isinstance(v, (int, float)))
+        
+        if not tiene_vehiculo:
             riesgo = min(5, riesgo + 1)
             justificaciones.append("Sin vehículo propio")
+        else:
+            justificaciones.append("Cuenta con vehículo propio")
         
-        # Viajes (indicador de capacidad económica)
-        if not estilo.get("viajes_ultimo_ano"):
+        # BUG FIX: Verificar numero_viajes_ultimo_ano > 0 en lugar de boolean
+        num_viajes = estilo.get("numero_viajes_ultimo_ano", 0)
+        if num_viajes <= 0:
             justificaciones.append("Sin viajes recreativos en el último año")
+        else:
+            justificaciones.append(f"Viajes en el último año: {num_viajes}")
         
         # Hobbies y actividades
-        if not estilo.get("hobbies"):
+        hobbies = estilo.get("hobbies", "")
+        num_hobbies = estilo.get("numero_hobbies", 0)
+        if not hobbies and num_hobbies <= 0:
             riesgo = min(5, riesgo + 1)
             justificaciones.append("Sin hobbies o actividades recreativas reportadas")
+        else:
+            justificaciones.append(f"Hobbies activos: {num_hobbies}")
         
-        # Asociaciones (indicador de integración social)
-        if not estilo.get("pertenece_asociaciones"):
+        # BUG FIX: Verificar pertenece_clubes en lugar de pertenece_asociaciones
+        pertenece_clubes = estilo.get("pertenece_clubes", False)
+        num_clubes = estilo.get("numero_clubes_asociaciones", 0)
+        if not pertenece_clubes and num_clubes <= 0:
             justificaciones.append("Sin membresía en asociaciones o clubes")
+        else:
+            justificaciones.append(f"Membresías activas: {num_clubes}")
         
-        if not justificaciones:
-            justificaciones.append("Estilo de vida estable y balanceado")
+        # Evaluar actividad física
+        freq_ejercicio = estilo.get("frecuencia_ejercicio_semana", 0)
+        if freq_ejercicio >= 3:
+            justificaciones.append(f"Actividad física regular ({freq_ejercicio} veces/semana)")
+        elif freq_ejercicio > 0:
+            justificaciones.append(f"Actividad física moderada ({freq_ejercicio} veces/semana)")
+        
+        # Evaluar consumo de tabaco
+        fuma = estilo.get("fuma", False)
+        if not fuma:
+            justificaciones.append("No fuma")
+        else:
+            riesgo = min(5, riesgo + 1)
+            justificaciones.append("Consumo de tabaco activo")
+        
+        # Mascotas (indicador de estabilidad)
+        if estilo.get("tiene_mascotas"):
+            num_mascotas = estilo.get("numero_mascotas", 0)
+            justificaciones.append(f"Tiene mascotas ({num_mascotas})")
         
         return riesgo, justificaciones
     

@@ -177,9 +177,7 @@ def main():
     else:
         print("  ./run.sh")
     
-    print("\nPara más información, consulte:")
-    print("  README.md - Manual completo")
-    print("  QUICKSTART.md - Guía rápida")
+    print("\nPara mas informacion, consulte README.md")
     print()
 
 

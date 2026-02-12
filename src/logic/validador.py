@@ -67,7 +67,7 @@ class ValidadorEstudio:
         contradicciones = []
         
         sueldo = fin.get("sueldo_mensual", 0)
-        otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []))
+        otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict))
         ingreso_total = sueldo + otros_ingresos
         
         gastos_totales = fin.get("gastos", {}).get("total", 0)
@@ -110,7 +110,7 @@ class ValidadorEstudio:
         
         # Verificar deudas vs balance
         deudas = fin.get("deudas", [])
-        monto_deudas = sum(d.get("monto", 0) for d in deudas)
+        monto_deudas = sum(d.get("monto", 0) for d in deudas if isinstance(d, dict))
         
         if len(deudas) > 0 and monto_deudas == 0:
             contradicciones.append("Reporta deudas pero sin montos especificados")
@@ -133,7 +133,7 @@ class ValidadorEstudio:
         miembros = fam.get("miembros_hogar", [])
         
         # Contar menores de edad
-        menores = sum(1 for m in miembros if m.get("edad", 99) < 18)
+        menores = sum(1 for m in miembros if isinstance(m, dict) and m.get("edad", 99) < 18)
         
         if num_hijos != menores and menores > 0:
             contradicciones.append(
@@ -168,12 +168,12 @@ class ValidadorEstudio:
         
         # Verificar ingreso familiar total vs suma
         ingreso_declarado = fam.get("ingreso_familiar_total", 0)
-        ingreso_calculado = sum(m.get("ingreso", 0) for m in miembros)
+        ingreso_calculado = sum(m.get("ingreso", 0) for m in miembros if isinstance(m, dict))
         
         # Agregar ingreso del candidato
         fin = datos.get("situacion_financiera", {})
         ingreso_calculado += fin.get("sueldo_mensual", 0)
-        ingreso_calculado += sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []))
+        ingreso_calculado += sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict))
         
         if ingreso_declarado > 0 and abs(ingreso_declarado - ingreso_calculado) > 500:
             contradicciones.append(

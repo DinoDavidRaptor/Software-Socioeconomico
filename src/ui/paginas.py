@@ -1,7 +1,7 @@
 """
 Páginas del wizard de estudios socioeconómicos.
 Autor: DINOS Tech
-Versión: 0.1.0
+Versión: 0.3.0
 
 Este módulo contiene todas las páginas del asistente de captura.
 """
@@ -62,6 +62,13 @@ class PaginaDatosPersonales(PaginaBase):
         layout.addRow("*Nombre Completo:", self.campos['nombre_completo'])
         self.registerField("nombre_completo*", self.campos['nombre_completo'])
         
+        # Género
+        self.campos['genero'] = QComboBox()
+        self.campos['genero'].addItems([
+            "Femenino", "Masculino", "Otro", "Prefiero no especificar"
+        ])
+        layout.addRow("*Género:", self.campos['genero'])
+        
         # Edad
         self.campos['edad'] = QSpinBox()
         self.campos['edad'].setRange(18, 100)
@@ -74,6 +81,25 @@ class PaginaDatosPersonales(PaginaBase):
         self.campos['fecha_nacimiento'].setDate(QDate.currentDate().addYears(-25))
         self.campos['fecha_nacimiento'].setDisplayFormat("dd/MM/yyyy")
         layout.addRow("Fecha de Nacimiento:", self.campos['fecha_nacimiento'])
+        
+        # Nacionalidad
+        self.campos['nacionalidad'] = QComboBox()
+        self.campos['nacionalidad'].addItems([
+            "Mexicana", "Estadounidense", "Colombiana", "Española", "Argentina", "Otra"
+        ])
+        layout.addRow("Nacionalidad:", self.campos['nacionalidad'])
+        
+        # Lugar de nacimiento
+        self.campos['estado_nacimiento'] = QComboBox()
+        self.campos['estado_nacimiento'].addItems([
+            "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", 
+            "Chiapas", "Chihuahua", "CDMX", "Coahuila", "Colima", "Durango", 
+            "Guanajuato", "Guerrero", "Hidalgo", "Jalisco", "Mexico", "Michoacán", 
+            "Morelos", "Nayarit", "Nuevo León", "Oaxaca", "Puebla", "Querétaro", 
+            "Quintana Roo", "San Luis Potosí", "Sinaloa", "Sonora", "Tabasco", 
+            "Tamaulipas", "Tlaxcala", "Veracruz", "Yucatán", "Zacatecas"
+        ])
+        layout.addRow("Lugar de Nacimiento:", self.campos['estado_nacimiento'])
         
         # Estado civil
         self.campos['estado_civil'] = QComboBox()
@@ -92,6 +118,29 @@ class PaginaDatosPersonales(PaginaBase):
         self.campos['ine'] = QLineEdit()
         self.campos['ine'].setPlaceholderText("Clave de elector")
         layout.addRow("Clave INE:", self.campos['ine'])
+        
+        # RFC
+        self.campos['rfc'] = QLineEdit()
+        self.campos['rfc'].setPlaceholderText("13 caracteres")
+        self.campos['rfc'].setMaxLength(13)
+        layout.addRow("RFC:", self.campos['rfc'])
+        
+        # NSS
+        self.campos['nss'] = QLineEdit()
+        self.campos['nss'].setPlaceholderText("Número de Seguridad Social")
+        self.campos['nss'].setMaxLength(11)
+        layout.addRow("NSS:", self.campos['nss'])
+        
+        # Licencia de conducir
+        self.campos['licencia_conducir'] = QCheckBox("Sí tiene licencia de conducir")
+        layout.addRow("Licencia de Conducir:", self.campos['licencia_conducir'])
+        
+        self.campos['tipo_licencia'] = QComboBox()
+        self.campos['tipo_licencia'].addItems([
+            "A - Motocicleta", "B - Automóvil", "C - Camión", "D - Autobús", 
+            "E - Remolques", "F - Máquina pesada", "G - Especial"
+        ])
+        layout.addRow("Tipo de Licencia:", self.campos['tipo_licencia'])
         
         # Teléfono
         self.campos['telefono'] = QLineEdit()
@@ -114,10 +163,17 @@ class PaginaDatosPersonales(PaginaBase):
         """Guarda los datos en el estudio."""
         dp = self.estudio.datos['datos_personales']
         dp['nombre_completo'] = self.campos['nombre_completo'].text()
+        dp['genero'] = self.campos['genero'].currentText()
         dp['edad'] = self.campos['edad'].value()
         dp['fecha_nacimiento'] = self.campos['fecha_nacimiento'].date().toString("dd/MM/yyyy")
+        dp['nacionalidad'] = self.campos['nacionalidad'].currentText()
+        dp['estado_nacimiento'] = self.campos['estado_nacimiento'].currentText()
         dp['estado_civil'] = self.campos['estado_civil'].currentText()
         dp['curp'] = self.campos['curp'].text()
+        dp['rfc'] = self.campos['rfc'].text()
+        dp['nss'] = self.campos['nss'].text()
+        dp['licencia_conducir'] = self.campos['licencia_conducir'].isChecked()
+        dp['licencia_tipo'] = self.campos['tipo_licencia'].currentText()
         dp['ine'] = self.campos['ine'].text()
         dp['telefono'] = self.campos['telefono'].text()
         dp['email'] = self.campos['email'].text()
@@ -127,6 +183,13 @@ class PaginaDatosPersonales(PaginaBase):
         """Carga los datos desde el estudio."""
         dp = self.estudio.datos['datos_personales']
         self.campos['nombre_completo'].setText(dp.get('nombre_completo', ''))
+        
+        genero = dp.get('genero', '')
+        if genero:
+            index = self.campos['genero'].findText(genero)
+            if index >= 0:
+                self.campos['genero'].setCurrentIndex(index)
+        
         self.campos['edad'].setValue(dp.get('edad', 25))
         
         fecha_nac = dp.get('fecha_nacimiento', '')
@@ -137,6 +200,18 @@ class PaginaDatosPersonales(PaginaBase):
             except:
                 pass
         
+        nacionalidad = dp.get('nacionalidad', '')
+        if nacionalidad:
+            index = self.campos['nacionalidad'].findText(nacionalidad)
+            if index >= 0:
+                self.campos['nacionalidad'].setCurrentIndex(index)
+        
+        estado_nacimiento = dp.get('estado_nacimiento', '')
+        if estado_nacimiento:
+            index = self.campos['estado_nacimiento'].findText(estado_nacimiento)
+            if index >= 0:
+                self.campos['estado_nacimiento'].setCurrentIndex(index)
+        
         estado_civil = dp.get('estado_civil', '')
         if estado_civil:
             index = self.campos['estado_civil'].findText(estado_civil)
@@ -144,6 +219,16 @@ class PaginaDatosPersonales(PaginaBase):
                 self.campos['estado_civil'].setCurrentIndex(index)
         
         self.campos['curp'].setText(dp.get('curp', ''))
+        self.campos['rfc'].setText(dp.get('rfc', ''))
+        self.campos['nss'].setText(dp.get('nss', ''))
+        self.campos['licencia_conducir'].setChecked(dp.get('licencia_conducir', False))
+        
+        licencia_tipo = dp.get('licencia_tipo', '')
+        if licencia_tipo:
+            index = self.campos['tipo_licencia'].findText(licencia_tipo)
+            if index >= 0:
+                self.campos['tipo_licencia'].setCurrentIndex(index)
+        
         self.campos['ine'].setText(dp.get('ine', ''))
         self.campos['telefono'].setText(dp.get('telefono', ''))
         self.campos['email'].setText(dp.get('email', ''))
@@ -263,21 +348,32 @@ class PaginaInformacionFamiliar(PaginaBase):
         self.campos['numero_hijos'].setRange(0, 20)
         form_layout.addRow("Número de Hijos:", self.campos['numero_hijos'])
         
+        self.campos['numero_hijos_estudiando'] = QSpinBox()
+        self.campos['numero_hijos_estudiando'].setRange(0, 20)
+        form_layout.addRow("Hijos Estudiando:", self.campos['numero_hijos_estudiando'])
+        
+        self.campos['gasto_mensual_educacion_hijos'] = QDoubleSpinBox()
+        self.campos['gasto_mensual_educacion_hijos'].setRange(0, 999999)
+        self.campos['gasto_mensual_educacion_hijos'].setPrefix("$ ")
+        self.campos['gasto_mensual_educacion_hijos'].setDecimals(2)
+        form_layout.addRow("Gasto Mensual Educación Hijos:", self.campos['gasto_mensual_educacion_hijos'])
+        
         main_layout.addLayout(form_layout)
         
         # Tabla de miembros del hogar
         main_layout.addWidget(QLabel("<b>Miembros del Hogar:</b>"))
         
         self.tabla_miembros = QTableWidget()
-        self.tabla_miembros.setColumnCount(5)
+        self.tabla_miembros.setColumnCount(6)
         self.tabla_miembros.setHorizontalHeaderLabels([
-            "Nombre", "Edad", "Parentesco", "Ocupación", "Ingreso Mensual"
+            "Nombre", "Edad", "Parentesco", "Ocupación", "Ingreso Mensual", "¿Depende?"
         ])
-        self.tabla_miembros.setColumnWidth(0, 150)
-        self.tabla_miembros.setColumnWidth(1, 60)
-        self.tabla_miembros.setColumnWidth(2, 120)
-        self.tabla_miembros.setColumnWidth(3, 150)
-        self.tabla_miembros.setColumnWidth(4, 120)
+        self.tabla_miembros.setColumnWidth(0, 130)
+        self.tabla_miembros.setColumnWidth(1, 50)
+        self.tabla_miembros.setColumnWidth(2, 100)
+        self.tabla_miembros.setColumnWidth(3, 130)
+        self.tabla_miembros.setColumnWidth(4, 100)
+        self.tabla_miembros.setColumnWidth(5, 70)
         
         main_layout.addWidget(self.tabla_miembros)
         
@@ -314,9 +410,14 @@ class PaginaInformacionFamiliar(PaginaBase):
         row = self.tabla_miembros.rowCount()
         self.tabla_miembros.insertRow(row)
         
-        # Agregar items editables
+        # Agregar items editables para las primeras 5 columnas
         for col in range(5):
             self.tabla_miembros.setItem(row, col, QTableWidgetItem(""))
+        
+        # Columna 5: Checkbox para dependencia
+        checkbox = QCheckBox()
+        checkbox.setChecked(True)  # Por defecto asume que depende
+        self.tabla_miembros.setCellWidget(row, 5, checkbox)
     
     def eliminar_miembro(self):
         """Elimina la fila seleccionada."""
@@ -343,6 +444,8 @@ class PaginaInformacionFamiliar(PaginaBase):
         """Guarda los datos en el estudio."""
         fam = self.estudio.datos['informacion_familiar']
         fam['numero_hijos'] = self.campos['numero_hijos'].value()
+        fam['numero_hijos_estudiando'] = self.campos['numero_hijos_estudiando'].value()
+        fam['gasto_mensual_educacion_hijos'] = self.campos['gasto_mensual_educacion_hijos'].value()
         
         # Guardar miembros
         miembros = []
@@ -352,6 +455,10 @@ class PaginaInformacionFamiliar(PaginaBase):
             parentesco = self.tabla_miembros.item(row, 2).text() if self.tabla_miembros.item(row, 2) else ""
             ocupacion = self.tabla_miembros.item(row, 3).text() if self.tabla_miembros.item(row, 3) else ""
             ingreso_str = self.tabla_miembros.item(row, 4).text() if self.tabla_miembros.item(row, 4) else "0"
+            
+            # Obtener checkbox de dependencia
+            checkbox = self.tabla_miembros.cellWidget(row, 5)
+            es_dependiente = checkbox.isChecked() if checkbox else True
             
             try:
                 edad = int(edad_str)
@@ -369,7 +476,8 @@ class PaginaInformacionFamiliar(PaginaBase):
                     "edad": edad,
                     "parentesco": parentesco,
                     "ocupacion": ocupacion,
-                    "ingreso": ingreso
+                    "ingreso": ingreso,
+                    "es_dependiente": es_dependiente
                 })
         
         fam['miembros_hogar'] = miembros
@@ -382,6 +490,8 @@ class PaginaInformacionFamiliar(PaginaBase):
         """Carga los datos desde el estudio."""
         fam = self.estudio.datos['informacion_familiar']
         self.campos['numero_hijos'].setValue(fam.get('numero_hijos', 0))
+        self.campos['numero_hijos_estudiando'].setValue(fam.get('numero_hijos_estudiando', 0))
+        self.campos['gasto_mensual_educacion_hijos'].setValue(fam.get('gasto_mensual_educacion_hijos', 0))
         
         # Cargar miembros
         miembros = fam.get('miembros_hogar', [])
@@ -396,6 +506,11 @@ class PaginaInformacionFamiliar(PaginaBase):
             self.tabla_miembros.setItem(row, 2, QTableWidgetItem(miembro.get('parentesco', '')))
             self.tabla_miembros.setItem(row, 3, QTableWidgetItem(miembro.get('ocupacion', '')))
             self.tabla_miembros.setItem(row, 4, QTableWidgetItem(f"{miembro.get('ingreso', 0):.2f}"))
+            
+            # Cargar checkbox de dependencia
+            checkbox = QCheckBox()
+            checkbox.setChecked(miembro.get('es_dependiente', True))
+            self.tabla_miembros.setCellWidget(row, 5, checkbox)
         
         self.calcular_ingreso_total()
 
@@ -430,8 +545,8 @@ class PaginaHistorialLaboral(PaginaBase):
         ])
         self.tabla_empleos.setColumnWidth(0, 140)
         self.tabla_empleos.setColumnWidth(1, 120)
-        self.tabla_empleos.setColumnWidth(2, 110)  # "Duración (meses)"
-        self.tabla_empleos.setColumnWidth(3, 90)   # "Salario"
+        self.tabla_empleos.setColumnWidth(2, 110)
+        self.tabla_empleos.setColumnWidth(3, 90)
         self.tabla_empleos.setColumnWidth(4, 140)
         self.tabla_empleos.setColumnWidth(5, 160)
         
@@ -471,14 +586,12 @@ class PaginaHistorialLaboral(PaginaBase):
         for row in range(self.tabla_empleos.rowCount()):
             empresa = self.tabla_empleos.item(row, 0).text() if self.tabla_empleos.item(row, 0) else ""
             if empresa:
-                # Convertir duración a entero
                 duracion_texto = self.tabla_empleos.item(row, 2).text() if self.tabla_empleos.item(row, 2) else "0"
                 try:
                     duracion_meses = int(duracion_texto) if duracion_texto else 0
                 except ValueError:
                     duracion_meses = 0
                 
-                # Convertir salario a float
                 salario_texto = self.tabla_empleos.item(row, 3).text() if self.tabla_empleos.item(row, 3) else "0"
                 try:
                     salario = float(salario_texto.replace(',', '')) if salario_texto else 0.0
@@ -488,11 +601,10 @@ class PaginaHistorialLaboral(PaginaBase):
                 empleos.append({
                     "empresa": empresa,
                     "puesto": self.tabla_empleos.item(row, 1).text() if self.tabla_empleos.item(row, 1) else "",
-                    "duracion_meses": duracion_meses,  # ⭐ CUANTITATIVO v0.3.0
+                    "duracion_meses": duracion_meses,
                     "salario": salario,
                     "jefe_nombre": self.tabla_empleos.item(row, 4).text() if self.tabla_empleos.item(row, 4) else "",
                     "motivo_separacion": self.tabla_empleos.item(row, 5).text() if self.tabla_empleos.item(row, 5) else "",
-                    # Campos opcionales para compatibilidad
                     "fecha_inicio": "",
                     "fecha_fin": ""
                 })
@@ -543,7 +655,7 @@ class PaginaReferencias(PaginaBase):
         self.tabla_referencias.setColumnWidth(1, 120)
         self.tabla_referencias.setColumnWidth(2, 110)
         self.tabla_referencias.setColumnWidth(3, 140)
-        self.tabla_referencias.setColumnWidth(4, 130)  # "Meses de Conocer"
+        self.tabla_referencias.setColumnWidth(4, 130)
         
         main_layout.addWidget(self.tabla_referencias)
         
@@ -586,7 +698,6 @@ class PaginaReferencias(PaginaBase):
         for row in range(self.tabla_referencias.rowCount()):
             nombre = self.tabla_referencias.item(row, 0).text() if self.tabla_referencias.item(row, 0) else ""
             if nombre:
-                # Convertir meses a entero
                 meses_texto = self.tabla_referencias.item(row, 4).text() if self.tabla_referencias.item(row, 4) else "0"
                 try:
                     meses = int(meses_texto) if meses_texto else 0
@@ -598,9 +709,9 @@ class PaginaReferencias(PaginaBase):
                     "relacion": self.tabla_referencias.item(row, 1).text() if self.tabla_referencias.item(row, 1) else "",
                     "telefono": self.tabla_referencias.item(row, 2).text() if self.tabla_referencias.item(row, 2) else "",
                     "ocupacion": self.tabla_referencias.item(row, 3).text() if self.tabla_referencias.item(row, 3) else "",
-                    "tiempo_conocerse_meses": meses,  # ⭐ CUANTITATIVO v0.3.0
+                    "tiempo_conocerse_meses": meses,
                     "domicilio_empresa": "",
-                    "tiempo_conocido": f"{meses} meses"  # Opcional para compatibilidad
+                    "tiempo_conocido": f"{meses} meses"
                 })
         
         self.estudio.datos['referencias'] = referencias
@@ -721,7 +832,6 @@ class PaginaFotografias(PaginaBase):
         )
         
         if archivo:
-            # Copiar a carpeta de fotos del proyecto
             carpeta_fotos = "data/fotos"
             os.makedirs(carpeta_fotos, exist_ok=True)
             
@@ -731,13 +841,11 @@ class PaginaFotografias(PaginaBase):
             try:
                 shutil.copy2(archivo, ruta_destino)
                 
-                # Agregar a la tabla
                 row = self.tabla_fotos.rowCount()
                 self.tabla_fotos.insertRow(row)
                 
                 self.tabla_fotos.setItem(row, 0, QTableWidgetItem(ruta_destino))
                 
-                # ComboBox para categoría
                 combo_cat = QComboBox()
                 combo_cat.addItems(["Fachada", "Interior", "Entorno", "Cocina", "Baño", "Otro"])
                 self.tabla_fotos.setCellWidget(row, 1, combo_cat)
@@ -751,11 +859,9 @@ class PaginaFotografias(PaginaBase):
         """Elimina la fotografía seleccionada."""
         row = self.tabla_fotos.currentRow()
         if row >= 0:
-            # Obtener ruta del archivo
             archivo_item = self.tabla_fotos.item(row, 0)
             if archivo_item:
                 archivo = archivo_item.text()
-                # Preguntar si eliminar el archivo físico
                 respuesta = QMessageBox.question(
                     self,
                     "Confirmar",
@@ -779,7 +885,6 @@ class PaginaFotografias(PaginaBase):
             if archivo_item:
                 archivo = archivo_item.text()
                 
-                # Obtener categoría del combo box
                 combo_widget = self.tabla_fotos.cellWidget(row, 1)
                 categoria = combo_widget.currentText() if combo_widget else "Sin categoría"
                 

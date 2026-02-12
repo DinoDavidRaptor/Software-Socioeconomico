@@ -1,0 +1,115 @@
+TERMINOS Y CONDICIONES DE USO - ECOSISTEMA COMERCIAL 360
+=========================================================
+
+CONTRATO DE LICENCIA DE USUARIO FINAL (EULA)
+DINOS Tech - Todos los derechos reservados
+
+FECHA DE VIGENCIA: 12 de febrero de 2026
+
+IMPORTANTE: LEA CUIDADOSAMENTE ANTES DE INSTALAR O USAR ESTE SOFTWARE
+
+Al instalar, copiar o utilizar este software, usted acepta los terminos de este acuerdo. Si no esta de acuerdo con estos terminos, no instale ni use el software.
+
+1. DEFINICIONES
+---------------
+- "Software": Ecosistema Comercial 360 y todos sus componentes, actualizaciones y documentacion.
+- "Licenciante": DINOS Tech, propietario y desarrollador del Software.
+- "Usuario": La persona o entidad que adquiere y utiliza el Software.
+- "Licencia": El derecho de uso otorgado bajo estos terminos.
+
+2. CONCESION DE LICENCIA
+------------------------
+DINOS Tech le concede una licencia no exclusiva, no transferible e intransferible para:
+a) Instalar y usar el Software en UN (1) equipo fisico.
+b) Realizar copias de seguridad unicamente para propositos de respaldo.
+
+La licencia esta vinculada al hardware especifico donde se activa y no puede transferirse a otro equipo sin autorizacion expresa de DINOS Tech.
+
+3. RESTRICCIONES
+----------------
+Usted NO puede:
+a) Copiar, modificar, adaptar o crear obras derivadas del Software.
+b) Descompilar, desensamblar o aplicar ingenieria inversa al Software.
+c) Distribuir, sublicenciar, arrendar, prestar o transferir el Software.
+d) Remover, alterar u ocultar avisos de propiedad o derechos de autor.
+e) Usar el Software para desarrollar productos competidores.
+f) Eludir o intentar eludir las protecciones tecnicas del Software.
+g) Compartir o publicar claves de licencia o archivos de activacion.
+
+4. PROPIEDAD INTELECTUAL
+------------------------
+El Software y toda la documentacion asociada son propiedad exclusiva de DINOS Tech. Este acuerdo no le transfiere ningun derecho de propiedad sobre el Software. Todos los derechos no expresamente otorgados estan reservados.
+
+5. ACTIVACION Y VALIDACION
+--------------------------
+El Software requiere activacion mediante una clave de licencia valida vinculada al hardware del equipo. El Software puede verificar periodicamente la validez de la licencia y desactivarse si detecta uso no autorizado.
+
+6. ACTUALIZACIONES
+------------------
+DINOS Tech puede proporcionar actualizaciones del Software. Las actualizaciones estan sujetas a los terminos de este acuerdo y pueden requerir aceptacion de terminos adicionales.
+
+7. SOPORTE TECNICO
+------------------
+El soporte tecnico se proporciona segun el tipo de licencia adquirido:
+- Licencia BASICA: Soporte por email (respuesta en 72 horas)
+- Licencia PROFESIONAL: Soporte prioritario (respuesta en 24 horas)
+- Licencia EMPRESARIAL: Soporte premium con atencion telefonica
+
+8. GARANTIA LIMITADA
+--------------------
+DINOS Tech garantiza que el Software funcionara sustancialmente segun la documentacion por un periodo de 90 dias desde la activacion. La unica obligacion de DINOS Tech sera, a su eleccion, reparar, reemplazar el Software o reembolsar el precio de la licencia.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL" SIN GARANTIAS ADICIONALES, EXPRESAS O IMPLICITAS.
+
+9. LIMITACION DE RESPONSABILIDAD
+--------------------------------
+EN NINGÚN CASO DINOS TECH SERA RESPONSABLE POR DANOS INDIRECTOS, INCIDENTALES, ESPECIALES O CONSECUENTES, INCLUYENDO PERDIDA DE DATOS, PERDIDA DE GANANCIAS O INTERRUPCION DEL NEGOCIO.
+
+La responsabilidad maxima de DINOS Tech bajo este acuerdo no excedera el monto pagado por la licencia del Software.
+
+10. CONFIDENCIALIDAD
+--------------------
+Usted acepta mantener confidencial cualquier informacion tecnica del Software, incluyendo pero no limitado a: codigos fuente, algoritmos, estructuras de datos y metodos de proteccion.
+
+11. TERMINACION
+---------------
+Este acuerdo permanece vigente hasta su terminacion. Se terminara automaticamente si usted incumple cualquiera de sus terminos. Al terminar:
+a) Debe cesar todo uso del Software.
+b) Debe destruir todas las copias del Software en su posesion.
+c) La terminacion no le exime de obligaciones previas.
+
+12. CUMPLIMIENTO LEGAL
+----------------------
+Usted acepta usar el Software en cumplimiento con todas las leyes y regulaciones aplicables, incluyendo leyes de proteccion de datos y privacidad.
+
+13. JURISDICCION
+----------------
+Este acuerdo se rige por las leyes de Mexico. Cualquier disputa sera sometida a los tribunales competentes de la Ciudad de Mexico.
+
+14. ACUERDO COMPLETO
+--------------------
+Este acuerdo constituye el acuerdo completo entre las partes y reemplaza cualquier acuerdo previo relacionado con el Software.
+
+15. DIVISIBILIDAD
+-----------------
+Si alguna provision de este acuerdo se considera invalida, las demas provisiones permanecen en pleno vigor y efecto.
+
+16. MODIFICACIONES
+------------------
+DINOS Tech puede modificar estos terminos con previo aviso. El uso continuado del Software constituye aceptacion de los terminos modificados.
+
+17. CONTACTO
+------------
+Para consultas sobre este acuerdo o para solicitar autorizaciones especiales:
+
+DINOS Tech
+Email: soporte@dinostech.com
+Sitio web: www.dinostech.com
+
+=========================================================
+AL HACER CLIC EN "ACEPTO" O AL INSTALAR EL SOFTWARE,
+USTED RECONOCE QUE HA LEIDO, ENTENDIDO Y ACEPTA
+ESTAR OBLIGADO POR LOS TERMINOS DE ESTE ACUERDO.
+=========================================================
+
+Copyright (c) 2026 DINOS Tech. Todos los derechos reservados.

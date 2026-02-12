@@ -11,21 +11,25 @@
 ### ✅ Nuevas Funcionalidades Implementadas
 
 #### 1. 🏢 **Selector de Empresa Solicitante**
+
 - Primera página del wizard con selección de empresa
 - Guardado persistente en `empresas.json`
 - Botón "+ Nueva" para agregar empresas dinámicamente
 
 #### 2. 🎲 **Generador de Datos Aleatorios de Prueba**
+
 - Botón "🎲 Generar Datos de Prueba" en el wizard
 - Genera estudios completos con datos realistas en segundos
 - Perfecto para testing y demos
 
 #### 3. 📊 **Campos Cuantitativos Mejorados**
+
 - **Historial Laboral**: Ahora usa `duracion_meses` (número) en lugar de fechas
 - **Referencias**: Ahora usa `tiempo_conocerse_meses` (número)
 - **Total**: 100+ campos cuantitativos para análisis estadístico
 
 #### 4. 📈 **Sistema de Visualización con Gráficas Profesionales**
+
 - **Nueva página**: "📊 Análisis Visual de Datos"
 - **4 Tabs de análisis**:
   - 💰 **Finanzas**: Ingresos vs Gastos, Distribución de Deudas, Indicadores Clave
@@ -44,6 +48,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 ## 🚀 Novedades de la Versión 0.2.0
 
 ### **Expansión Masiva de Datos**
+
 - ✅ **100+ campos nuevos** distribuidos en todas las secciones
 - ✅ **3 nuevas secciones**: Salud detallada, Empleo Actual, Estilo de Vida
 - ✅ Información personal expandida: nacionalidad, RFC, NSS, licencia, antecedentes legales
@@ -52,12 +57,14 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - ✅ Finanzas avanzadas: ahorros, tarjetas de crédito, historial de deudas
 
 ### **Justificaciones Automáticas de Riesgo**
+
 - ✅ Cada puntaje de riesgo viene acompañado de **razones específicas**
 - ✅ Ejemplos: "Gastos exceden el ingreso (105.3%)", "3 dependientes sin ingreso propio"
 - ✅ Transparencia total en la evaluación de riesgos
 - ✅ Incluido en todos los formatos de exportación (PDF, Word, Excel)
 
 ### **Sistema de Validación Inteligente**
+
 - ✅ **Detección automática de contradicciones**:
   - Balance declarado vs calculado
   - Trabajo actual vs sueldo reportado
@@ -70,6 +77,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
   - Falta de servicios básicos
 
 ### **Arquitectura Modular Revolucionaria**
+
 - ✅ **Sistema de configuración de campos**: Agregar campos nuevos en 5 minutos
 - ✅ **Generación automática de UI**: Sin escribir código Qt manualmente
 - ✅ **Reducción del 80% en código**: De 50 líneas a 10 líneas por campo
@@ -78,6 +86,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 ## Características Principales
 
 ### Gestión de Estudios
+
 - Creación de estudios socioeconómicos mediante asistente paso a paso
 - Edición y actualización de estudios existentes
 - Eliminación segura de registros
@@ -86,6 +95,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 ### Captura de Información (140+ Campos)
 
 #### **Datos Personales** (19 campos)
+
 - Identificación completa: CURP, RFC, INE, NSS
 - Nacionalidad, lugar de nacimiento
 - Escolaridad completa: nivel, carrera, estado
@@ -94,6 +104,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Antecedentes legales
 
 #### **Salud e Intereses** (13 campos)
+
 - Estado de salud general y tipo de sangre
 - Enfermedades crónicas con tratamientos
 - Alergias y medicamentos
@@ -101,6 +112,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Actividades de tiempo libre y deportes
 
 #### **Información Familiar** (expandida)
+
 - Composición del hogar completa
 - Dependientes económicos identificados
 - Enfermedades de familiares
@@ -108,6 +120,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Personas en el hogar
 
 #### **Situación Financiera** (mejorada)
+
 - Ingresos completos con otros ingresos
 - Gastos detallados por 7+ categorías
 - Ahorros e inversiones
@@ -115,6 +128,7 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Balance automático con alertas
 
 #### **Empleo Actual** (9 campos - NUEVO)
+
 - Empresa con teléfono y dirección
 - Área/Departamento
 - Antigüedad
@@ -122,12 +136,14 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Jefe directo con puesto
 
 #### **Estilo de Vida** (7 campos - NUEVO)
+
 - Vehículo propio (marca, modelo, año)
 - Viajes en el último año
 - Hobbies y pasatiempos
 - Asociaciones/Clubes
 
 #### **Vivienda y Patrimonio** (expandida)
+
 - Condición física de la vivienda
 - Mobiliario completo
 - Cálculo de hacinamiento
@@ -135,11 +151,13 @@ Sistema integral de **próxima generación** para la elaboración, gestión y an
 - Calidad de construcción
 
 #### **Historial Laboral**
+
 - Empleos anteriores con fechas
 - Motivos de separación
 - Referencias laborales
 
 #### **Referencias Personales**
+
 - Contactos con relación y antigüedad
 - Teléfonos verificables
 
@@ -149,7 +167,6 @@ Cálculo automático en **6 dimensiones** con razones específicas:
 
 1. **Riesgo Financiero**
    - Justificaciones: balance, porcentaje de gastos, ahorros, deudas
-   
 2. **Riesgo Familiar**
    - Justificaciones: dependientes, ingresos familiares, enfermedades
 
@@ -170,12 +187,12 @@ Cálculo automático en **6 dimensiones** con razones específicas:
 
 ## Requisitos del Sistema
 
-
 ### Exportación de Reportes
 
 Todos los formatos incluyen las nuevas secciones y justificaciones de riesgo:
 
 #### **PDF** - Informe Profesional Completo
+
 - Encabezado con logo de empresa
 - Todas las secciones expandidas
 - Tabla de riesgos con puntajes
@@ -184,6 +201,7 @@ Todos los formatos incluyen las nuevas secciones y justificaciones de riesgo:
 - Formato profesional listo para imprimir
 
 #### **Word (DOCX)** - Documento Editable
+
 - Estructura similar al PDF
 - Formato editable para personalizaciones
 - Tablas con estilos predefinidos
@@ -191,6 +209,7 @@ Todos los formatos incluyen las nuevas secciones y justificaciones de riesgo:
 - Compatible con Microsoft Word y LibreOffice
 
 #### **Excel (XLSX)** - Tabla Comparativa
+
 - **33 columnas** con todos los datos clave
 - Columnas alternadas: Riesgo + Justificaciones
 - Formato condicional con colores de riesgo
@@ -198,6 +217,7 @@ Todos los formatos incluyen las nuevas secciones y justificaciones de riesgo:
 - Ideal para comparar múltiples candidatos
 
 ### Funciones Adicionales
+
 - Generación de resumen concentrado para análisis externo
 - Ayuda contextual durante la captura
 - Validaciones automáticas de datos
@@ -218,15 +238,20 @@ Todos los formatos incluyen las nuevas secciones y justificaciones de riesgo:
 La forma más sencilla de instalar y ejecutar la aplicación:
 
 #### En macOS/Linux:
+
 ```bash
-# 1. Instalar (crea entorno virtual automáticamente)
+# 1. Instalar (crea entorno virtual automaticamente)
 python3 install.py
 
-# 2. Ejecutar
+# 2. Dar permisos de ejecucion (solo la primera vez)
+chmod +x run.sh
+
+# 3. Ejecutar
 ./run.sh
 ```
 
 #### En Windows:
+
 ```bash
 # 1. Instalar (crea entorno virtual automáticamente)
 python install.py
@@ -242,9 +267,11 @@ El instalador `install.py` detecta automáticamente si necesita crear un entorno
 Si prefiere instalar manualmente:
 
 #### Paso 1: Instalar Python
+
 Si no tiene Python instalado, descárguelo de [python.org](https://www.python.org/downloads/)
 
 #### Paso 2: Crear Entorno Virtual (Recomendado)
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # En macOS/Linux
@@ -252,11 +279,13 @@ venv\Scripts\activate     # En Windows
 ```
 
 #### Paso 3: Instalar Dependencias
+
 ```bash
 pip install -r requirements.txt
 ```
 
 #### Paso 4: Ejecutar la Aplicación
+
 ```bash
 python main.py
 ```
@@ -267,13 +296,13 @@ Antes del primer uso, edite el archivo `config.json` con la información de su e
 
 ```json
 {
-    "empresa": {
-        "nombre": "Tu Empresa S.A. de C.V.",
-        "direccion": "Calle Principal #123, Col. Centro",
-        "telefono": "(555) 123-4567",
-        "email": "contacto@tuempresa.com",
-        "logo": "logo.png"
-    }
+  "empresa": {
+    "nombre": "Tu Empresa S.A. de C.V.",
+    "direccion": "Calle Principal #123, Col. Centro",
+    "telefono": "(555) 123-4567",
+    "email": "contacto@tuempresa.com",
+    "logo": "logo.png"
+  }
 }
 ```
 
@@ -292,51 +321,51 @@ Coloque su logo en formato PNG en la carpeta del proyecto.
 1. En la ventana principal, haga clic en **"Crear Nuevo"**
 2. Se abrirá el asistente con 8 secciones expandidas
 3. Complete cada sección:
-   
+
    **Datos Personales** (19 campos):
    - Identificación completa: CURP, RFC, INE, NSS
    - Datos de contacto y emergencia
    - Escolaridad y licencia de conducir
    - Antecedentes legales si aplica
-   
+
    **Salud e Intereses** (13 campos):
    - Estado de salud y tipo de sangre
    - Enfermedades crónicas con tratamientos
    - Hábitos: tabaco, alcohol, sustancias
    - Actividades y deportes
-   
+
    **Información Familiar**:
    - Lista completa de miembros del hogar
    - Dependientes económicos
    - Enfermedades de familiares
    - Ingresos por persona
-   
+
    **Situación Financiera**:
    - Empleo actual con salario
    - Otros ingresos detallados
    - Gastos por categoría
    - Ahorros, tarjetas de crédito, deudas
    - Balance automático con alertas
-   
+
    **Empleo Actual** (NUEVO):
    - Datos de la empresa actual
    - Jefe directo y puesto
    - Tipo de contrato y antigüedad
-   
+
    **Estilo de Vida** (NUEVO):
    - Vehículos propios
    - Viajes recientes
    - Hobbies y asociaciones
-   
+
    **Vivienda y Patrimonio**:
    - Tipo y tenencia
    - Condición física y hacinamiento
    - Mobiliario y servicios
-   
+
    **Historial Laboral**:
    - Empleos anteriores
    - Motivos de separación
-   
+
    **Referencias Personales**:
    - Mínimo 2 referencias
    - Con contacto verificable
@@ -370,12 +399,14 @@ Coloque su logo en formato PNG en la carpeta del proyecto.
 ### 📄 Exportar Reportes
 
 #### PDF o Word (Individual)
+
 1. Seleccione un estudio
 2. **"Exportar"** → Elija formato
 3. El archivo se guarda en `export/`
 4. Incluye todas las secciones y justificaciones
 
 #### Excel (Comparativa)
+
 1. **"Exportar a Excel"** en ventana principal
 2. Seleccione múltiples estudios
 3. Genera tabla con 33 columnas
@@ -384,6 +415,7 @@ Coloque su logo en formato PNG en la carpeta del proyecto.
 ### 🔍 Validación Automática
 
 El sistema detecta automáticamente:
+
 - ✅ Balance declarado vs calculado
 - ✅ Trabajo actual vs sueldo
 - ✅ Vivienda propia con renta
@@ -400,6 +432,7 @@ Las alertas aparecen durante la captura.
 Gracias al sistema modular, agregar campos es extremadamente fácil:
 
 1. **Editar `src/ui/configuracion_campos.py`** (30 segundos):
+
 ```python
 {
     'id': 'nuevo_campo',
@@ -411,6 +444,7 @@ Gracias al sistema modular, agregar campos es extremadamente fácil:
 ```
 
 2. **Editar `src/models/estudio.py`** (15 segundos):
+
 ```python
 "nuevo_campo": "",
 ```
@@ -439,24 +473,19 @@ software-socioeconomico/
 │   └── export/          # Exportadores (PDF, Word, Excel)
 ├── data/               # Almacenamiento de estudios (JSON)
 ├── export/             # Archivos exportados
-├── docs/               # Documentación técnica
-│   ├── GUIA_AGREGAR_CAMPOS.md
-│   ├── ACTUALIZACION_V02.md
-│   └── RESUMEN_EJECUTIVO_V02.md
-├── config.json         # Configuración de empresa
-├── install.py          # Instalador automático
-├── run.sh / run.bat    # Scripts de ejecución
+├── config.json         # Configuracion de empresa
+├── install.py          # Instalador automatico
+├── run.sh / run.bat    # Scripts de ejecucion
 └── main.py             # Punto de entrada
 
 ```
 
-### Documentación Técnica
+### Documentacion
 
-- **`GUIA_AGREGAR_CAMPOS.md`**: Manual completo con ejemplos
-- **`ACTUALIZACION_V02.md`**: Detalles técnicos de cambios v0.2.0
-- **`RESUMEN_EJECUTIVO_V02.md`**: Resumen ejecutivo del proyecto
+- **`README.md`**: Este manual
 - **`CHANGELOG.md`**: Historial de cambios
-- **`SOLUCION_ENTORNO.md`**: Solución al problema de entorno virtual en macOS
+- **`tasks.md`**: Lista de tareas del proyecto
+
 2. Haga clic en **"Generar Info Concentrada"**
 3. Se mostrará un cuadro de diálogo con el texto generado
 4. Haga clic en **"Copiar al Portapapeles"**
@@ -467,26 +496,31 @@ software-socioeconomico/
 El sistema calcula automáticamente indicadores de riesgo basados en los datos capturados:
 
 ### Riesgo Financiero (1-5)
+
 - **1 (Muy Bajo):** Gastos < 50% del ingreso, sin deudas, ahorros
 - **3 (Medio):** Gastos 50-80% del ingreso
 - **5 (Muy Alto):** Gastos > ingresos, deudas significativas
 
 ### Riesgo Familiar (1-5)
+
 - **1 (Muy Bajo):** Pocos dependientes, red de apoyo, estabilidad
 - **3 (Medio):** Dependientes moderados, situación estable
 - **5 (Muy Alto):** Muchos dependientes, falta de apoyo
 
 ### Riesgo Vivienda (1-5)
+
 - **1 (Muy Bajo):** Vivienda propia, buenas condiciones, zona segura
 - **3 (Medio):** Vivienda rentada, condiciones aceptables
 - **5 (Muy Alto):** Vivienda precaria, zona de riesgo
 
 ### Riesgo Laboral (1-5)
+
 - **1 (Muy Bajo):** Empleo estable, buenas referencias, antigüedad
 - **3 (Medio):** Algunos cambios de empleo, referencias aceptables
 - **5 (Muy Alto):** Múltiples empleos cortos, referencias negativas
 
 ### Riesgo Global
+
 Promedio ponderado de todos los riesgos anteriores, proporcionando una evaluación integral.
 
 ## Estructura de Archivos
@@ -510,12 +544,12 @@ software socioeconomico/
 
 ## Solución de Problemas
 
-
 ## ❓ Preguntas Frecuentes (FAQ)
 
 ### ¿Puedo agregar más campos al formulario?
 
 **¡Sí!** El sistema modular hace esto extremadamente fácil. Consulte `GUIA_AGREGAR_CAMPOS.md` para instrucciones detalladas. En resumen:
+
 1. Edite `src/ui/configuracion_campos.py` (agregar definición)
 2. Edite `src/models/estudio.py` (agregar campo al modelo)
 3. ¡Listo! El sistema genera la UI automáticamente
@@ -527,6 +561,7 @@ software socioeconomico/
 ### ¿Cómo funcionan las justificaciones de riesgo?
 
 Cada puntaje de riesgo (1-5) viene con una lista de razones específicas basadas en los datos reales del estudio. Por ejemplo:
+
 - "Gastos exceden el ingreso (105.3%)"
 - "Sin ahorros reportados"
 - "3 dependientes sin ingreso propio"
@@ -540,6 +575,7 @@ Esto hace que los puntajes sean transparentes y explicables.
 ### ¿Qué hacer si encuentro una contradicción en los datos?
 
 El sistema detecta contradicciones automáticamente durante la edición. Aparecerán alertas indicando qué revisar. Puede:
+
 1. Corregir el dato incorrecto
 2. Documentar la explicación en "Observaciones"
 3. Revisar manualmente antes de exportar
@@ -551,6 +587,7 @@ No hay límite fijo. Cada estudio ocupa aproximadamente 50-100 KB (sin fotos). C
 ### ¿Los reportes se pueden personalizar?
 
 Los exportadores están en `src/export/`. Puede modificarlos para:
+
 - Cambiar colores y estilos
 - Agregar/quitar secciones
 - Modificar el orden de presentación
@@ -561,6 +598,7 @@ Los exportadores están en `src/export/`. Puede modificarlos para:
 ### La aplicación no inicia
 
 **En macOS:**
+
 ```bash
 # Si aparece error de "externally-managed-environment"
 python3 install.py  # Esto crea un entorno virtual automáticamente
@@ -568,6 +606,7 @@ python3 install.py  # Esto crea un entorno virtual automáticamente
 ```
 
 **En Windows/Linux:**
+
 ```bash
 # Verificar versión de Python
 python --version    # Debe ser 3.8 o superior
@@ -632,12 +671,24 @@ Esto puede ocurrir si el estudio se creó antes de v0.2.0. El sistema calcula ri
 ### Entorno virtual no funciona (macOS Homebrew)
 
 ```bash
-# Usar el instalador automático que maneja esto
+# Usar el instalador automatico que maneja esto
 python3 install.py
 
 # O crear manualmente con path completo
 /usr/local/bin/python3 -m venv venv
 source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### PyQt5 no instala en Mac Apple Silicon (M1/M2/M3)
+
+```bash
+# Asegurarse de usar Python nativo ARM
+arch -arm64 python3 install.py
+
+# Si persiste, instalar via Homebrew
+brew install pyqt@5
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -655,6 +706,7 @@ Consulte `SOLUCION_ENTORNO.md` para detalles completos.
 ## 🚀 Roadmap Futuro
 
 ### Versión 0.3.0 (Planificada)
+
 - Dashboard de métricas y tendencias
 - Gráficas comparativas de riesgos
 - Sistema de plantillas personalizables
@@ -662,6 +714,7 @@ Consulte `SOLUCION_ENTORNO.md` para detalles completos.
 - API REST para integración con otros sistemas
 
 ### Versión 0.4.0 (Planificada)
+
 - Modo multi-usuario con permisos
 - Base de datos SQL opcional
 - Sincronización en la nube
@@ -700,6 +753,7 @@ Este software es propiedad de DINOS Tech. Consulte el archivo LICENSE para más 
 ## Cambios Principales por Versión
 
 ### v0.2.0 (9 de diciembre de 2025)
+
 - ✅ 100+ campos nuevos en todas las secciones
 - ✅ Sistema de justificaciones automáticas de riesgo
 - ✅ Validación inteligente con detección de contradicciones
@@ -710,9 +764,9 @@ Este software es propiedad de DINOS Tech. Consulte el archivo LICENSE para más 
 - ✅ Documentación completa y guías de desarrollo
 
 ### v0.1.0 (Versión inicial)
+
 - ✅ Sistema básico de captura de estudios
 - ✅ Exportación a PDF, Word y Excel
 - ✅ Cálculo de riesgos en 4 dimensiones
 - ✅ Gestión de fotografías
 - ✅ Interfaz gráfica con PyQt5
-

@@ -26,12 +26,12 @@ def _load_matplotlib():
     if not _matplotlib_loaded:
         import matplotlib.pyplot as mplt
         from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FC
-        from matplotlib.figure import Fig
+        from matplotlib.figure import Figure
         import numpy as numpy
         
         plt = mplt
         FigureCanvas = FC
-        Figure = Fig
+        
         np = numpy
         plt.style.use('seaborn-v0_8-darkgrid')
         _matplotlib_loaded = True
@@ -134,6 +134,8 @@ class PaginaVisualizacionDatos(QWizardPage):
             self.generar_tab_estilo_vida()
         except Exception as e:
             print(f"Error generando gráficas: {e}")
+            import traceback
+            traceback.print_exc()
     
     def generar_tab_financiero(self):
         """Genera gráficas de análisis financiero."""
@@ -175,14 +177,19 @@ class PaginaVisualizacionDatos(QWizardPage):
         fig = Figure(figsize=(10, 5), facecolor='white')
         ax = fig.add_subplot(111)
         
-        ingreso = finanzas.get('ingreso_total_mensual', 0)
-        ahorros = finanzas.get('monto_ahorros_mensuales', 0)
-        pagos_deudas = finanzas.get('total_pagos_mensuales_deudas', 0)
-        gastos_comida = finanzas.get('gasto_promedio_comida_diaria', 0) * 30
-        gastos_medicamentos = finanzas.get('gasto_mensual_medicamentos', 0)
-        gastos_gasolina = finanzas.get('gasto_mensual_gasolina', 0)
+        ingreso = finanzas.get('sueldo_mensual', 0) or 0
+        ahorros = finanzas.get('monto_ahorros_mensuales', 0) or 0
+        pagos_deudas = finanzas.get('total_pagos_mensuales_deudas', 0) or 0
+        gastos_comida = (finanzas.get('gastos', {}).get('alimentacion', 0) or 0)
+        gastos_vivienda = (finanzas.get('gastos', {}).get('vivienda', 0) or 0)
+        gastos_transporte = (finanzas.get('gastos', {}).get('transporte', 0) or 0)
+        gastos_servicios = (finanzas.get('gastos', {}).get('servicios', 0) or 0)
         
-        total_gastos = pagos_deudas + gastos_comida + gastos_medicamentos + gastos_gasolina
+        total_gastos = (gastos_comida + gastos_vivienda + gastos_transporte + gastos_servicios +
+                       (finanzas.get('gastos', {}).get('salud', 0) or 0) +
+                       (finanzas.get('gastos', {}).get('educacion', 0) or 0) +
+                       (finanzas.get('gastos', {}).get('recreacion', 0) or 0) +
+                       (finanzas.get('gastos', {}).get('otros', 0) or 0))
         
         categorias = ['Ingresos\nMensuales', 'Gastos\nTotales', 'Ahorros\nMensuales', 'Saldo\nDisponible']
         valores = [ingreso, total_gastos, ahorros, ingreso - total_gastos - ahorros]
@@ -210,10 +217,17 @@ class PaginaVisualizacionDatos(QWizardPage):
         fig = Figure(figsize=(10, 5), facecolor='white')
         ax = fig.add_subplot(111)
         
-        deuda_tarjetas = finanzas.get('deuda_tarjetas_total', 0)
-        prestamos = finanzas.get('monto_prestamos_personales', 0)
-        hipoteca = finanzas.get('monto_hipoteca', 0)
-        auto = finanzas.get('monto_prestamo_auto', 0)
+        deuda_tarjetas = finanzas.get('deuda_tarjetas_total', 0) or 0
+        prestamos = finanzas.get('monto_prestamos_personales', 0) or 0
+        hipoteca = finanzas.get('monto_hipoteca', 0) or 0
+        auto = finanzas.get('monto_prestamo_auto', 0) or 0
+        
+        if not finanzas.get('tiene_prestamos_personales', False):
+            prestamos = 0
+        if not finanzas.get('tiene_prestamo_hipotecario', False):
+            hipoteca = 0
+        if not finanzas.get('tiene_prestamo_auto', False):
+            auto = 0
         
         if deuda_tarjetas + prestamos + hipoteca + auto == 0:
             ax.text(0.5, 0.5, '✅ Sin Deudas Registradas', 
@@ -226,9 +240,6 @@ class PaginaVisualizacionDatos(QWizardPage):
             valores = []
             colores_pastel = ['#e74c3c', '#e67e22', '#f39c12', '#3498db']
             
-            if deuda_tarjetas > 0:
-                etiquetas.append(f'Tarjetas\n${deuda_tarjetas:,.0f}')
-                valores.append(deuda_tarjetas)
             if prestamos > 0:
                 etiquetas.append(f'Préstamos\n${prestamos:,.0f}')
                 valores.append(prestamos)
@@ -238,6 +249,9 @@ class PaginaVisualizacionDatos(QWizardPage):
             if auto > 0:
                 etiquetas.append(f'Auto\n${auto:,.0f}')
                 valores.append(auto)
+            if deuda_tarjetas > 0:
+                etiquetas.append(f'Tarjetas\n${deuda_tarjetas:,.0f}')
+                valores.append(deuda_tarjetas)
             
             wedges, texts, autotexts = ax.pie(valores, labels=etiquetas, autopct='%1.1f%%',
                                               colors=colores_pastel[:len(valores)],
@@ -258,8 +272,15 @@ class PaginaVisualizacionDatos(QWizardPage):
         fig = Figure(figsize=(10, 5), facecolor='white')
         ax = fig.add_subplot(111)
         
-        porcentaje_ahorro = finanzas.get('porcentaje_ahorro', 0)
-        porcentaje_deudas = finanzas.get('porcentaje_deudas_ingreso', 0)
+        ingreso = finanzas.get('sueldo_mensual', 0) or 1
+        gastos = (finanzas.get('gastos', {}).get('total', 0) or 
+                 sum((finanzas.get('gastos', {}) or {}).values()))
+        ahorros = finanzas.get('monto_ahorros_mensuales', 0) or 0
+        total_deudas = finanzas.get('total_deudas', 0) or 0
+        
+        # Calcular porcentajes
+        porcentaje_ahorro = (ahorros / ingreso * 100) if ingreso > 0 else 0
+        porcentaje_deudas = (total_deudas / ingreso * 100) if ingreso > 0 else 0
         
         # Límites saludables
         ahorro_saludable = 20  # 20% ideal
@@ -320,23 +341,22 @@ class PaginaVisualizacionDatos(QWizardPage):
         ax = fig.add_subplot(111)
         
         finanzas = self.estudio.datos.get('situacion_financiera', {})
-        estilo = self.estudio.datos.get('estilo_vida', {})
+        gastos = finanzas.get('gastos', {}) or {}
         
         # Recopilar gastos
-        gastos = {
-            'Comida': finanzas.get('gasto_promedio_comida_diaria', 0) * 30,
-            'Medicamentos': finanzas.get('gasto_mensual_medicamentos', 0),
-            'Gasolina/Transporte': finanzas.get('gasto_mensual_gasolina', 0),
-            'Hobbies': estilo.get('gasto_mensual_hobbies', 0),
-            'Mascotas': estilo.get('gasto_mensual_mascotas', 0),
-            'Gimnasio': estilo.get('gasto_mensual_gimnasio', 0),
-            'Cultura': estilo.get('gasto_mensual_cultura', 0),
-            'Tabaco': estilo.get('gasto_mensual_tabaco', 0),
-            'Alcohol': estilo.get('gasto_mensual_alcohol', 0)
+        gastos_data = {
+            'Comida': gastos.get('alimentacion', 0) or 0,
+            'Salud': gastos.get('salud', 0) or 0,
+            'Educación': gastos.get('educacion', 0) or 0,
+            'Recreación': gastos.get('recreacion', 0) or 0,
+            'Vivienda': gastos.get('vivienda', 0) or 0,
+            'Transporte': gastos.get('transporte', 0) or 0,
+            'Servicios': gastos.get('servicios', 0) or 0,
+            'Otros': gastos.get('otros', 0) or 0
         }
         
         # Filtrar gastos mayores a 0
-        gastos_filtrados = {k: v for k, v in gastos.items() if v > 0}
+        gastos_filtrados = {k: v for k, v in gastos_data.items() if v > 0}
         
         if not gastos_filtrados:
             ax.text(0.5, 0.5, '📊 Sin Gastos Registrados', 
@@ -350,7 +370,7 @@ class PaginaVisualizacionDatos(QWizardPage):
             
             # Paleta de colores profesional
             colores = ['#3498db', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6', 
-                      '#1abc9c', '#e67e22', '#34495e', '#16a085']
+                      '#1abc9c', '#e67e22', '#34495e']
             
             wedges, texts, autotexts = ax.pie(valores, labels=etiquetas, autopct='%1.1f%%',
                                               colors=colores[:len(valores)], startangle=90,
@@ -391,28 +411,44 @@ class PaginaVisualizacionDatos(QWizardPage):
         fig = Figure(figsize=(10, 7), facecolor='white')
         ax = fig.add_subplot(111, projection='polar')
         
-        riesgos = self.estudio.datos.get('riesgos', {})
+        # Obtener riesgos del estudio
+        riesgos_data = self.estudio.datos.get('riesgos', {})
         
-        categorias = ['Financiero', 'Familiar', 'Vivienda', 'Laboral', 'Salud', 'Global']
+        # Si no hay datos de riesgos, usar valores predeterminados
+        if not riesgos_data:
+            # Intentar calcular riesgos desde los datos disponibles
+            riesgos_data = self._calcular_riesgos_desde_datos()
+        
+        categorias = ['Financiero', 'Familiar', 'Vivienda', 'Laboral', 'Salud', 'Estilo Vida']
+        
+        def get_riesgo_valor(key):
+            """Extrae el valor numérico de riesgo de un dict o número."""
+            data = riesgos_data.get(key, {})
+            if isinstance(data, dict):
+                return float(data.get('puntaje', data.get('nivel', 1)))
+            elif isinstance(data, (int, float)):
+                return float(data)
+            return 1.0
+        
         valores = [
-            riesgos.get('financiero', 0),
-            riesgos.get('familiar', 0),
-            riesgos.get('vivienda', 0),
-            riesgos.get('laboral', 0),
-            riesgos.get('salud', 0),
-            riesgos.get('global', 0)
+            get_riesgo_valor('financiero'),
+            get_riesgo_valor('familiar'),
+            get_riesgo_valor('vivienda'),
+            get_riesgo_valor('laboral'),
+            get_riesgo_valor('salud'),
+            get_riesgo_valor('estilo_vida')
         ]
         
         # Completar el círculo
-        valores += valores[:1]
+        valores_plot = valores + valores[:1]
         
         # Ángulos
         angulos = np.linspace(0, 2 * np.pi, len(categorias), endpoint=False).tolist()
         angulos += angulos[:1]
         
         # Dibujar
-        ax.plot(angulos, valores, 'o-', linewidth=2, color='#e74c3c', label='Nivel de Riesgo')
-        ax.fill(angulos, valores, alpha=0.25, color='#e74c3c')
+        ax.plot(angulos, valores_plot, 'o-', linewidth=2, color='#e74c3c', label='Nivel de Riesgo')
+        ax.fill(angulos, valores_plot, alpha=0.25, color='#e74c3c')
         
         # Zona segura (riesgo < 3)
         zona_segura = [3] * len(angulos)
@@ -430,6 +466,76 @@ class PaginaVisualizacionDatos(QWizardPage):
         
         fig.tight_layout()
         return fig
+    
+    def _calcular_riesgos_desde_datos(self):
+        """Calcula riesgos desde los datos disponibles del estudio."""
+        try:
+            riesgos = {}
+            
+            # Riesgo Financiero: basado en balance y gastos
+            finanzas = self.estudio.datos.get('situacion_financiera', {})
+            gastos = finanzas.get('gastos', {}) or {}
+            ingreso = finanzas.get('sueldo_mensual', 0) or 0
+            total_gastos = sum(gastos.values()) if gastos else 0
+            balance = ingreso - total_gastos
+            
+            if balance < 0:
+                riesgos['financiero'] = 5  # Alto riesgo
+            elif balance < ingreso * 0.1:
+                riesgos['financiero'] = 4  # Riesgo medio-alto
+            elif balance < ingreso * 0.3:
+                riesgos['financiero'] = 3  # Riesgo medio
+            else:
+                riesgos['financiero'] = 2  # Bajo riesgo
+            
+            # Riesgo Familiar: basado en dependientes
+            familia = self.estudio.datos.get('informacion_familiar', {})
+            numero_hijos = familia.get('numero_hijos', 0)
+            miembros = familia.get('miembros_hogar', [])
+            dependientes = sum(1 for m in miembros if isinstance(m, dict) and m.get('es_dependiente', True))
+            
+            if numero_hijos > 3 or dependientes > 3:
+                riesgos['familiar'] = 4
+            elif numero_hijos > 1 or dependientes > 1:
+                riesgos['familiar'] = 3
+            else:
+                riesgos['familiar'] = 2
+            
+            # Riesgo de Vivienda
+            vivienda = self.estudio.datos.get('vivienda', {})
+            tipo_vivienda = vivienda.get('tipo_vivienda', '')
+            if tipo_vivienda == 'Rentada':
+                riesgos['vivienda'] = 3
+            elif tipo_vivienda in ['Cuarto rentado', 'Otro']:
+                riesgos['vivienda'] = 4
+            else:
+                riesgos['vivienda'] = 2
+            
+            # Riesgo Laboral (basado en estabilidad)
+            historial = self.estudio.datos.get('historial_laboral', [])
+            if isinstance(historial, list):
+                if len(historial) > 3:
+                    riesgos['laboral'] = 3  # Muchos trabajos previos
+                else:
+                    riesgos['laboral'] = 2
+            else:
+                riesgos['laboral'] = 2
+            
+            # Riesgo Salud
+            salud = self.estudio.datos.get('salud_intereses', {})
+            padecimientos = salud.get('padecimientos', '')
+            if padecimientos and padecimientos.lower() not in ['', 'ninguno', 'ninguna']:
+                riesgos['salud'] = 3
+            else:
+                riesgos['salud'] = 2
+            
+            # Riesgo Estilo de Vida (predeterminado)
+            riesgos['estilo_vida'] = 2
+            
+            return riesgos
+        except Exception as e:
+            print(f"Error calculando riesgos: {e}")
+            return {'financiero': 2, 'familiar': 2, 'vivienda': 2, 'laboral': 2, 'salud': 2, 'estilo_vida': 2}
     
     def generar_tab_estilo_vida(self):
         """Genera gráficas de estilo de vida."""
@@ -459,13 +565,13 @@ class PaginaVisualizacionDatos(QWizardPage):
         salud = self.estudio.datos.get('salud_intereses', {})
         
         actividades = {
-            'Hobbies': estilo.get('numero_hobbies', 0),
-            'Salidas/Mes': estilo.get('frecuencia_salidas_mes', 0),
-            'Viajes/Año': estilo.get('numero_viajes_ultimo_ano', 0),
-            'Ejercicio/Semana': estilo.get('frecuencia_ejercicio_semana', 0),
-            'Actividades Culturales/Mes': estilo.get('frecuencia_actividades_culturales_mes', 0),
-            'Copas/Semana': salud.get('copas_por_semana', 0),
-            'Cigarros/Día': salud.get('cigarros_por_dia', 0)
+            'Hobbies': estilo.get('numero_hobbies', 0) or 0,
+            'Salidas/Mes': estilo.get('frecuencia_salidas_mes', 0) or 0,
+            'Viajes/Año': estilo.get('numero_viajes_ultimo_ano', 0) or 0,
+            'Ejercicio/Semana': estilo.get('frecuencia_ejercicio_semana', 0) or 0,
+            'Actividades Culturales/Mes': estilo.get('frecuencia_actividades_culturales_mes', 0) or 0,
+            'Copas/Semana': salud.get('copas_por_semana', 0) or 0,
+            'Cigarros/Día': salud.get('cigarros_por_dia', 0) or 0
         }
         
         # Colores según tipo de actividad
@@ -481,7 +587,7 @@ class PaginaVisualizacionDatos(QWizardPage):
         
         categorias = list(actividades.keys())
         valores = list(actividades.values())
-        colores_barras = [colores[cat] for cat in categorias]
+        colores_barras = [colores.get(cat, '#34495e') for cat in categorias]
         
         barras = ax.barh(categorias, valores, color=colores_barras, edgecolor='black', linewidth=1, alpha=0.8)
         
