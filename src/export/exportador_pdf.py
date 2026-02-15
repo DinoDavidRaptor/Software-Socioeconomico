@@ -12,21 +12,45 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import (
     SimpleDocTemplate, Table, TableStyle, Paragraph, 
-    Spacer, Image, PageBreak, KeepTogether
+    Spacer, Image, PageBreak, KeepTogether, CondPageBreak
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from typing import Dict, Optional
 import tempfile
 
-# matplotlib imports for chart generation
-try:
-    import matplotlib
-    matplotlib.use('Agg')  # Use non-interactive backend
-    import matplotlib.pyplot as plt
-    import numpy as np
-    MATPLOTLIB_AVAILABLE = True
-except ImportError:
-    MATPLOTLIB_AVAILABLE = False
+# matplotlib se carga de forma lazy para evitar bloqueos en Mac
+# Las variables globales se inicializan en _cargar_matplotlib()
+MATPLOTLIB_AVAILABLE = None  # None = no probado, True/False = resultado
+_plt = None
+_np = None
+
+
+def _cargar_matplotlib():
+    """
+    Carga matplotlib de forma lazy.
+    Esto evita bloqueos al importar el modulo en Mac con Python 3.14.
+    """
+    global MATPLOTLIB_AVAILABLE, _plt, _np
+    
+    if MATPLOTLIB_AVAILABLE is not None:
+        return MATPLOTLIB_AVAILABLE
+    
+    try:
+        import os
+        os.environ.setdefault('MPLBACKEND', 'Agg')
+        
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-interactive backend
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        _plt = plt
+        _np = np
+        MATPLOTLIB_AVAILABLE = True
+    except ImportError:
+        MATPLOTLIB_AVAILABLE = False
+    
+    return MATPLOTLIB_AVAILABLE
 
 
 class ExportadorPDF:
@@ -74,6 +98,81 @@ class ExportadorPDF:
             spaceAfter=6
         ))
     
+    def _crear_tabla_sin_cortar(self, data: list, colWidths: list, estilo: TableStyle, 
+                                 max_filas_por_pagina: int = 15) -> list:
+        """
+        Crea una tabla que evita cortes entre paginas.
+        Si la tabla tiene muchas filas, la divide en subtablas.
+        
+        Args:
+            data: Datos de la tabla (lista de filas)
+            colWidths: Anchos de columnas
+            estilo: Estilo de la tabla
+            max_filas_por_pagina: Maximo de filas antes de dividir
+            
+        Returns:
+            Lista de elementos (tabla o tablas) para agregar al documento
+        """
+        elements = []
+        
+        if len(data) <= max_filas_por_pagina:
+            # Tabla pequena - usar KeepTogether
+            tabla = Table(data, colWidths=colWidths)
+            tabla.setStyle(estilo)
+            elements.append(KeepTogether([tabla]))
+        else:
+            # Tabla grande - dividirla para evitar cortes feos
+            header = [data[0]] if data else []
+            filas = data[1:] if len(data) > 1 else []
+            
+            # Dividir en chunks
+            for i in range(0, len(filas), max_filas_por_pagina - 1):
+                chunk = filas[i:i + max_filas_por_pagina - 1]
+                if header:
+                    chunk_data = header + chunk
+                else:
+                    chunk_data = chunk
+                
+                tabla = Table(chunk_data, colWidths=colWidths)
+                tabla.setStyle(estilo)
+                elements.append(tabla)
+                
+                if i + max_filas_por_pagina - 1 < len(filas):
+                    elements.append(Spacer(1, 0.1*inch))
+        
+        return elements
+    
+    def _agregar_seccion_con_keepttogether(self, elements: list, titulo: str, 
+                                           contenido: list, forzar_nueva_pagina: bool = False):
+        """
+        Agrega una seccion al documento intentando mantenerla junta.
+        Si el contenido es muy grande, al menos mantiene el titulo con el inicio.
+        
+        Args:
+            elements: Lista de elementos del documento
+            titulo: Titulo de la seccion
+            contenido: Lista de elementos de contenido
+            forzar_nueva_pagina: Si True, agrega PageBreak antes
+        """
+        if forzar_nueva_pagina:
+            elements.append(PageBreak())
+        
+        # Crear titulo
+        titulo_elem = Paragraph(titulo, self.styles['CustomHeading'])
+        
+        # Si el contenido es pequeno (1-2 elementos), mantener todo junto
+        if len(contenido) <= 2:
+            elementos_juntos = [titulo_elem] + contenido
+            elements.append(KeepTogether(elementos_juntos))
+        else:
+            # Mantener al menos el titulo con el primer elemento
+            elementos_inicio = [titulo_elem, contenido[0]]
+            elements.append(KeepTogether(elementos_inicio))
+            
+            # Agregar el resto
+            for elem in contenido[1:]:
+                elements.append(elem)
+    
     def _crear_encabezado(self, elements: list, datos: Dict = None):
         """
         Crea el encabezado del documento con logo, datos de la empresa y ejecutor del estudio.
@@ -84,52 +183,85 @@ class ExportadorPDF:
         """
         # Agregar logo si existe - con dimensiones adaptadas al formato del logo
         logo_path = self.config.get("logo", "")
+        logo_agregado = False
         if logo_path and os.path.exists(logo_path):
             try:
-                # Intentar usar PIL para obtener dimensiones
-                try:
-                    from PIL import Image as PILImage
-                    with PILImage.open(logo_path) as pil_img:
-                        orig_width, orig_height = pil_img.size
-                        aspect_ratio = orig_width / orig_height if orig_height > 0 else 1
+                # Verificar si es SVG
+                if logo_path.lower().endswith('.svg'):
+                    try:
+                        from svglib.svglib import svg2rlg
+                        from reportlab.graphics import renderPDF
                         
-                        max_width = 3.0 * inch
-                        max_height = 1.5 * inch
-                        
-                        if orig_width > orig_height:
-                            new_width = min(max_width, orig_width * 0.5)
-                            new_height = new_width / aspect_ratio
-                        else:
-                            new_height = min(max_height, orig_height * 0.5)
-                            new_width = new_height * aspect_ratio
-                        
-                        if new_width > max_width:
-                            new_width = max_width
-                            new_height = new_width / aspect_ratio
-                        if new_height > max_height:
-                            new_height = max_height
-                            new_width = new_height * aspect_ratio
-                        
-                        img = Image(logo_path, width=new_width, height=new_height)
-                except ImportError:
-                    # Fallback sin PIL - usar dimensiones fijas adaptadas
-                    img = Image(logo_path, width=2.5*inch, height=1*inch)
-                
-                img.hAlign = 'CENTER'
-                elements.append(img)
-                elements.append(Spacer(1, 0.15*inch))
+                        drawing = svg2rlg(logo_path)
+                        if drawing:
+                            # Escalar SVG a dimensiones apropiadas
+                            max_width = 3.0 * inch
+                            max_height = 1.5 * inch
+                            
+                            scale_x = max_width / drawing.width if drawing.width > max_width else 1
+                            scale_y = max_height / drawing.height if drawing.height > max_height else 1
+                            scale = min(scale_x, scale_y, 1)
+                            
+                            drawing.width *= scale
+                            drawing.height *= scale
+                            drawing.scale(scale, scale)
+                            drawing.hAlign = 'CENTER'
+                            
+                            elements.append(drawing)
+                            elements.append(Spacer(1, 0.15*inch))
+                            logo_agregado = True
+                    except ImportError:
+                        print("Error: svglib no esta instalado. Ejecute: pip install svglib")
+                else:
+                    # Intentar usar PIL para obtener dimensiones (PNG, JPG, etc.)
+                    try:
+                        from PIL import Image as PILImage
+                        with PILImage.open(logo_path) as pil_img:
+                            orig_width, orig_height = pil_img.size
+                            aspect_ratio = orig_width / orig_height if orig_height > 0 else 1
+                            
+                            max_width = 3.0 * inch
+                            max_height = 1.5 * inch
+                            
+                            if orig_width > orig_height:
+                                new_width = min(max_width, orig_width * 0.5)
+                                new_height = new_width / aspect_ratio
+                            else:
+                                new_height = min(max_height, orig_height * 0.5)
+                                new_width = new_height * aspect_ratio
+                            
+                            if new_width > max_width:
+                                new_width = max_width
+                                new_height = new_width / aspect_ratio
+                            if new_height > max_height:
+                                new_height = max_height
+                                new_width = new_height * aspect_ratio
+                            
+                            img = Image(logo_path, width=new_width, height=new_height)
+                    except ImportError:
+                        # Fallback sin PIL - usar dimensiones fijas adaptadas
+                        img = Image(logo_path, width=2.5*inch, height=1*inch)
+                    
+                    img.hAlign = 'CENTER'
+                    elements.append(img)
+                    elements.append(Spacer(1, 0.15*inch))
+                    logo_agregado = True
                 
             except Exception as e:
                 print(f"Error al procesar logo: {e}")
-                pass
+                logo_agregado = False
         
-        # Datos de la empresa
-        empresa_data = [
-            [Paragraph(f"<b>{self.config.get('nombre', 'N/A')}</b>", self.styles['CustomTitle'])],
-            [Paragraph(self.config.get('direccion', ''), self.styles['Normal'])],
-            [Paragraph(f"Tel: {self.config.get('telefono', '')} | Email: {self.config.get('email', '')}", 
-                      self.styles['Normal'])]
-        ]
+        # Datos de la empresa (omitir nombre si ya hay logo que lo contiene)
+        empresa_data = []
+        if not logo_agregado:
+            empresa_data.append([Paragraph(f"<b>{self.config.get('nombre', 'N/A')}</b>", self.styles['CustomTitle'])])
+        
+        direccion = self.config.get('direccion', '')
+        if direccion and direccion != '-':
+            empresa_data.append([Paragraph(direccion, self.styles['Normal'])])
+        
+        empresa_data.append([Paragraph(f"Tel: {self.config.get('telefono', '')} | Email: {self.config.get('email', '')}", 
+                      self.styles['Normal'])])
         
         empresa_table = Table(empresa_data, colWidths=[6.5*inch])
         empresa_table.setStyle(TableStyle([
@@ -199,8 +331,7 @@ class ExportadorPDF:
     
     def _crear_seccion_datos_personales(self, datos: Dict, elements: list):
         """Crea la sección de datos personales."""
-        elements.append(Paragraph("DATOS PERSONALES", self.styles['CustomHeading']))
-        
+        # Se construye la seccion localmente y se agrega con KeepTogether al final
         dp = datos.get("datos_personales", {})
         
         # Usar Paragraphs para word wrap automatico en campos largos
@@ -267,12 +398,16 @@ class ExportadorPDF:
             ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]))
         
+        # Para tablas grandes como Datos Personales, NO usar KeepTogether completo
+        # Solo mantener titulo con primeras filas visibles, permitir division de tabla
+        titulo_datos = Paragraph("DATOS PERSONALES", self.styles['CustomHeading'])
+        elements.append(titulo_datos)
         elements.append(tabla)
         elements.append(Spacer(1, 0.2*inch))
     
     def _crear_seccion_salud(self, datos: Dict, elements: list):
         """Crea la sección de salud e intereses."""
-        elements.append(Paragraph("SALUD E INTERESES", self.styles['CustomHeading']))
+        # Se construye la seccion localmente y se agrega con KeepTogether al final
         
         salud = datos.get("salud_intereses", {})
         
@@ -317,13 +452,12 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 4),
         ]))
         
-        elements.append(tabla_salud)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para mantener titulo y tabla juntos
+        titulo_salud = Paragraph("SALUD E INTERESES", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_salud, tabla_salud, Spacer(1, 0.2*inch)]))
     
     def _crear_seccion_familiar(self, datos: Dict, elements: list):
         """Crea la sección de información familiar."""
-        elements.append(Paragraph("INFORMACIÓN FAMILIAR", self.styles['CustomHeading']))
-        
         fam = datos.get("informacion_familiar", {})
         
         # Usar Paragraphs para word wrap en observaciones
@@ -352,8 +486,9 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_general)
-        elements.append(Spacer(1, 0.1*inch))
+        # Usar KeepTogether para evitar cortes de pagina
+        titulo_familiar = Paragraph("INFORMACION FAMILIAR", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_familiar, tabla_general, Spacer(1, 0.1*inch)]))
         
         # Tabla de ingresos
         ingreso_familiar = fam.get("ingreso_familiar", [])
@@ -388,7 +523,6 @@ class ExportadorPDF:
         miembros = fam.get("miembros_hogar", [])
         if miembros and isinstance(miembros, list) and len(miembros) > 0:
             elements.append(Spacer(1, 0.1*inch))
-            elements.append(Paragraph("<b>Miembros del Hogar:</b>", self.styles['CustomBody']))
             
             # Headers de la tabla con texto blanco
             header_style = ParagraphStyle('MiembrosHeader', parent=self.styles['Normal'], 
@@ -430,14 +564,15 @@ class ExportadorPDF:
                 ('ALIGN', (4, 1), (4, -1), 'RIGHT'),
             ]))
             
-            elements.append(tabla_miembros)
+            # Usar KeepTogether para titulo y tabla de miembros
+            titulo_miembros = Paragraph("<b>Miembros del Hogar:</b>", self.styles['CustomBody'])
+            elements.append(KeepTogether([titulo_miembros, tabla_miembros]))
         
         elements.append(Spacer(1, 0.2*inch))
     
     def _crear_seccion_financiera(self, datos: Dict, elements: list):
         """Crea la sección de situación financiera."""
-        elements.append(Paragraph("SITUACIÓN FINANCIERA", self.styles['CustomHeading']))
-        
+        # Titulo se agrega con KeepTogether al final con la primera tabla
         fin = datos.get("situacion_financiera", {})
         
         # Calculate percentages if not already stored
@@ -527,12 +662,11 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_laboral)
-        elements.append(Spacer(1, 0.1*inch))
+        # Usar KeepTogether para titulo y primera tabla
+        titulo_financiera = Paragraph("SITUACION FINANCIERA", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_financiera, tabla_laboral, Spacer(1, 0.1*inch)]))
         
-        # Gastos mensuales
-        elements.append(Paragraph("<b>Gastos Mensuales:</b>", self.styles['CustomBody']))
-        
+        # Gastos mensuales - usar KeepTogether para titulo y tabla
         gastos = fin.get("gastos", {})
         gastos_data = [
             ["Categoría", "Monto"],
@@ -561,8 +695,9 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_gastos)
-        elements.append(Spacer(1, 0.1*inch))
+        # KeepTogether para titulo y tabla de gastos
+        titulo_gastos = Paragraph("<b>Gastos Mensuales:</b>", self.styles['CustomBody'])
+        elements.append(KeepTogether([titulo_gastos, tabla_gastos, Spacer(1, 0.1*inch)]))
         
         # Balance
         balance_data = [[
@@ -601,8 +736,6 @@ class ExportadorPDF:
         # Mostrar siempre si hay datos de empleo
         if not empleo or not empleo.get("empresa"):
             return
-        
-        elements.append(Paragraph("EMPLEO ACTUAL", self.styles['CustomHeading']))
         
         # Usar Paragraphs para word wrap en campos largos
         label_style = ParagraphStyle('EmpLabel', parent=self.styles['Normal'], 
@@ -649,8 +782,9 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 4),
         ]))
         
-        elements.append(tabla_empleo)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para titulo y tabla de empleo
+        titulo_empleo = Paragraph("EMPLEO ACTUAL", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_empleo, tabla_empleo, Spacer(1, 0.2*inch)]))
     
     def _crear_seccion_estilo_vida(self, datos: Dict, elements: list):
         """Crea la sección de estilo de vida."""
@@ -658,8 +792,6 @@ class ExportadorPDF:
         
         if not estilo:
             return
-        
-        elements.append(Paragraph("ESTILO DE VIDA", self.styles['CustomHeading']))
         
         # Usar Paragraphs para word wrap en campos largos como hobbies, actividades
         label_style = ParagraphStyle('EstiloLabel', parent=self.styles['Normal'], 
@@ -705,13 +837,12 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 4),
         ]))
         
-        elements.append(tabla_estilo)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para titulo y tabla de estilo de vida
+        titulo_estilo = Paragraph("ESTILO DE VIDA", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_estilo, tabla_estilo, Spacer(1, 0.2*inch)]))
     
     def _crear_seccion_vivienda(self, datos: Dict, elements: list):
         """Crea la seccion de vivienda."""
-        elements.append(Paragraph("VIVIENDA Y PATRIMONIO", self.styles['CustomHeading']))
-        
         viv = datos.get("vivienda", {})
         
         # Usar Paragraphs para word wrap automatico en campos largos
@@ -746,8 +877,9 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_viv)
-        elements.append(Spacer(1, 0.1*inch))
+        # Usar KeepTogether para titulo y tabla de vivienda
+        titulo_vivienda = Paragraph("VIVIENDA Y PATRIMONIO", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_vivienda, tabla_viv, Spacer(1, 0.1*inch)]))
         
         # Servicios
         servicios = viv.get("servicios", {})
@@ -767,8 +899,6 @@ class ExportadorPDF:
         
         if not historial:
             return
-        
-        elements.append(Paragraph("HISTORIAL LABORAL", self.styles['CustomHeading']))
         
         # Encabezados con texto blanco
         header_style = ParagraphStyle('HistHeader', parent=self.styles['Normal'], 
@@ -804,8 +934,15 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 4),
         ]))
         
-        elements.append(tabla_hist)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para evitar cortes de pagina
+        titulo = Paragraph("HISTORIAL LABORAL", self.styles['CustomHeading'])
+        if len(hist_data) <= 8:  # Si son pocas filas, mantener todo junto
+            elements.append(KeepTogether([titulo, tabla_hist, Spacer(1, 0.2*inch)]))
+        else:
+            # Para tablas grandes, al menos mantener titulo con encabezado
+            elements.append(KeepTogether([titulo, Spacer(1, 0.05*inch)]))
+            elements.append(tabla_hist)
+            elements.append(Spacer(1, 0.2*inch))
     
     def _crear_seccion_referencias(self, datos: Dict, elements: list):
         """Crea la sección de referencias personales."""
@@ -813,8 +950,6 @@ class ExportadorPDF:
         
         if not referencias:
             return
-        
-        elements.append(Paragraph("REFERENCIAS PERSONALES", self.styles['CustomHeading']))
         
         # Encabezados con texto blanco
         header_style = ParagraphStyle('RefHeader', parent=self.styles['Normal'], 
@@ -860,13 +995,17 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 4),
         ]))
         
-        elements.append(tabla_ref)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para evitar cortes de pagina
+        titulo = Paragraph("REFERENCIAS PERSONALES", self.styles['CustomHeading'])
+        if len(ref_data) <= 6:  # Si son pocas referencias, mantener todo junto
+            elements.append(KeepTogether([titulo, tabla_ref, Spacer(1, 0.2*inch)]))
+        else:
+            elements.append(KeepTogether([titulo, Spacer(1, 0.05*inch)]))
+            elements.append(tabla_ref)
+            elements.append(Spacer(1, 0.2*inch))
     
     def _crear_seccion_analisis_riesgos(self, datos: Dict, elements: list):
         """Crea la sección de análisis de riesgos."""
-        elements.append(Paragraph("ANÁLISIS DE RIESGOS", self.styles['CustomHeading']))
-        
         # BUG FIX: Usar primero los riesgos almacenados en el JSON si existen
         riesgos_almacenados = datos.get("riesgos", {})
         
@@ -974,48 +1113,53 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_riesgos)
-        elements.append(Spacer(1, 0.2*inch))
+        # Usar KeepTogether para mantener titulo y tabla de riesgos juntos
+        titulo_riesgos = Paragraph("ANALISIS DE RIESGOS", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_riesgos, tabla_riesgos, Spacer(1, 0.2*inch)]))
         
         # Justificaciones - formato compacto en tabla de 2 columnas si hay muchas
         if justificaciones:
-            elements.append(Paragraph("<b>Justificaciones de Riesgos:</b>", self.styles['CustomHeading']))
-            
             # Filtrar justificaciones vacias
             justificaciones_validas = [j for j in justificaciones if j and j.strip()]
             
-            if len(justificaciones_validas) > 6:
-                # Formato compacto: tabla de 2 columnas
-                mitad = (len(justificaciones_validas) + 1) // 2
-                col1 = justificaciones_validas[:mitad]
-                col2 = justificaciones_validas[mitad:]
+            if justificaciones_validas:
+                titulo_just = Paragraph("<b>Justificaciones de Riesgos:</b>", self.styles['CustomHeading'])
                 
-                # Crear filas con ambas columnas
-                just_data = []
-                for i in range(mitad):
-                    item1 = Paragraph(f"<bullet>&bull;</bullet> {col1[i]}", self.styles['Normal'])
-                    item2 = Paragraph(f"<bullet>&bull;</bullet> {col2[i]}", self.styles['Normal']) if i < len(col2) else Paragraph("", self.styles['Normal'])
-                    just_data.append([item1, item2])
-                
-                just_table = Table(just_data, colWidths=[3.25*inch, 3.25*inch])
-                just_table.setStyle(TableStyle([
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('LEFTPADDING', (0, 0), (-1, -1), 3),
-                    ('RIGHTPADDING', (0, 0), (-1, -1), 3),
-                    ('TOPPADDING', (0, 0), (-1, -1), 2),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-                ]))
-                elements.append(just_table)
-            else:
-                # Formato normal para pocas justificaciones
-                for just in justificaciones_validas:
-                    elements.append(Paragraph(f"<bullet>&bull;</bullet> {just}", self.styles['CustomBody']))
-            
-            elements.append(Spacer(1, 0.2*inch))
+                if len(justificaciones_validas) > 6:
+                    # Formato compacto: tabla de 2 columnas
+                    mitad = (len(justificaciones_validas) + 1) // 2
+                    col1 = justificaciones_validas[:mitad]
+                    col2 = justificaciones_validas[mitad:]
+                    
+                    # Crear filas con ambas columnas
+                    just_data = []
+                    for i in range(mitad):
+                        item1 = Paragraph(f"<bullet>&bull;</bullet> {col1[i]}", self.styles['Normal'])
+                        item2 = Paragraph(f"<bullet>&bull;</bullet> {col2[i]}", self.styles['Normal']) if i < len(col2) else Paragraph("", self.styles['Normal'])
+                        just_data.append([item1, item2])
+                    
+                    just_table = Table(just_data, colWidths=[3.25*inch, 3.25*inch])
+                    just_table.setStyle(TableStyle([
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                        ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                        ('TOPPADDING', (0, 0), (-1, -1), 2),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                    ]))
+                    # KeepTogether para titulo y tabla de justificaciones
+                    elements.append(KeepTogether([titulo_just, just_table, Spacer(1, 0.2*inch)]))
+                else:
+                    # Formato normal para pocas justificaciones - crear lista y usar KeepTogether
+                    lista_just = [titulo_just]
+                    for just in justificaciones_validas:
+                        lista_just.append(Paragraph(f"<bullet>&bull;</bullet> {just}", self.styles['CustomBody']))
+                    lista_just.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether(lista_just))
     
     def _crear_graficos_completos(self, datos: Dict, elements: list):
         """Crea todas las graficas del estudio (6 graficas en total)."""
-        if not MATPLOTLIB_AVAILABLE:
+        # Cargar matplotlib de forma lazy
+        if not _cargar_matplotlib():
             return
         
         try:
@@ -1030,10 +1174,9 @@ class ExportadorPDF:
             if fig1:
                 temp_path1 = self._guardar_figura_temporal(fig1)
                 if temp_path1:
-                    elements.append(Paragraph("<b>1. Analisis Financiero: Ingresos vs Gastos</b>", self.styles['CustomBody']))
+                    titulo1 = Paragraph("<b>1. Analisis Financiero: Ingresos vs Gastos</b>", self.styles['CustomBody'])
                     img1 = Image(temp_path1, width=6*inch, height=3*inch)
-                    elements.append(img1)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo1, img1, Spacer(1, 0.2*inch)]))
             
             # ============================================
             # GRAFICA 2: Distribucion de Deudas
@@ -1042,10 +1185,9 @@ class ExportadorPDF:
             if fig2:
                 temp_path2 = self._guardar_figura_temporal(fig2)
                 if temp_path2:
-                    elements.append(Paragraph("<b>2. Distribucion de Deudas</b>", self.styles['CustomBody']))
+                    titulo2 = Paragraph("<b>2. Distribucion de Deudas</b>", self.styles['CustomBody'])
                     img2 = Image(temp_path2, width=6*inch, height=3*inch)
-                    elements.append(img2)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo2, img2, Spacer(1, 0.2*inch)]))
             
             # ============================================
             # GRAFICA 3: Indicadores Financieros
@@ -1054,10 +1196,9 @@ class ExportadorPDF:
             if fig3:
                 temp_path3 = self._guardar_figura_temporal(fig3)
                 if temp_path3:
-                    elements.append(Paragraph("<b>3. Indicadores Financieros Clave</b>", self.styles['CustomBody']))
+                    titulo3 = Paragraph("<b>3. Indicadores Financieros Clave</b>", self.styles['CustomBody'])
                     img3 = Image(temp_path3, width=6*inch, height=3*inch)
-                    elements.append(img3)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo3, img3, Spacer(1, 0.2*inch)]))
             
             elements.append(PageBreak())
             
@@ -1068,10 +1209,9 @@ class ExportadorPDF:
             if fig4:
                 temp_path4 = self._guardar_figura_temporal(fig4)
                 if temp_path4:
-                    elements.append(Paragraph("<b>4. Distribucion de Gastos Mensuales</b>", self.styles['CustomBody']))
+                    titulo4 = Paragraph("<b>4. Distribucion de Gastos Mensuales</b>", self.styles['CustomBody'])
                     img4 = Image(temp_path4, width=6*inch, height=4*inch)
-                    elements.append(img4)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo4, img4, Spacer(1, 0.2*inch)]))
             
             # ============================================
             # GRAFICA 5: Radar de Riesgos
@@ -1080,10 +1220,9 @@ class ExportadorPDF:
             if fig5:
                 temp_path5 = self._guardar_figura_temporal(fig5)
                 if temp_path5:
-                    elements.append(Paragraph("<b>5. Radar de Indicadores de Riesgo</b>", self.styles['CustomBody']))
+                    titulo5 = Paragraph("<b>5. Radar de Indicadores de Riesgo</b>", self.styles['CustomBody'])
                     img5 = Image(temp_path5, width=6*inch, height=4*inch)
-                    elements.append(img5)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo5, img5, Spacer(1, 0.2*inch)]))
             
             # ============================================
             # GRAFICA 6: Actividades y Habitos
@@ -1092,10 +1231,9 @@ class ExportadorPDF:
             if fig6:
                 temp_path6 = self._guardar_figura_temporal(fig6)
                 if temp_path6:
-                    elements.append(Paragraph("<b>6. Frecuencia de Actividades y Habitos</b>", self.styles['CustomBody']))
+                    titulo6 = Paragraph("<b>6. Frecuencia de Actividades y Habitos</b>", self.styles['CustomBody'])
                     img6 = Image(temp_path6, width=6*inch, height=3.5*inch)
-                    elements.append(img6)
-                    elements.append(Spacer(1, 0.2*inch))
+                    elements.append(KeepTogether([titulo6, img6, Spacer(1, 0.2*inch)]))
             
         except Exception as e:
             print(f"Error creando graficos completos: {e}")
@@ -1109,7 +1247,7 @@ class ExportadorPDF:
                 temp_path = tmp.name
             fig.savefig(temp_path, dpi=150, bbox_inches='tight', facecolor='white')
             self._temp_files.append(temp_path)
-            plt.close(fig)
+            _plt.close(fig)
             return temp_path
         except Exception as e:
             print(f"Error guardando figura: {e}")
@@ -1118,7 +1256,7 @@ class ExportadorPDF:
     def _crear_grafica_ingresos_vs_gastos(self, datos: Dict):
         """Crea grafica de barras: Ingresos vs Gastos vs Ahorros."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = _plt.subplots(figsize=(10, 5))
             
             finanzas = datos.get('situacion_financiera', {})
             ingreso = finanzas.get('ingreso_total_mensual', 0) or finanzas.get('sueldo_mensual', 0) or 0
@@ -1151,7 +1289,7 @@ class ExportadorPDF:
     def _crear_grafica_distribucion_deudas(self, datos: Dict):
         """Crea grafica de pastel: Distribucion de Deudas."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = _plt.subplots(figsize=(10, 5))
             
             finanzas = datos.get('situacion_financiera', {})
             deuda_tarjetas = finanzas.get('deuda_tarjetas_total', 0) or 0
@@ -1203,7 +1341,7 @@ class ExportadorPDF:
     def _crear_grafica_indicadores_financieros(self, datos: Dict):
         """Crea grafica de indicadores financieros clave."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = _plt.subplots(figsize=(10, 5))
             
             finanzas = datos.get('situacion_financiera', {})
             ingreso = finanzas.get('ingreso_total_mensual', 0) or finanzas.get('sueldo_mensual', 0) or 1
@@ -1220,7 +1358,7 @@ class ExportadorPDF:
             valores_actuales = [porcentaje_ahorro, min(porcentaje_deudas, 100)]
             valores_referencia = [ahorro_saludable, deuda_maxima]
             
-            x = np.arange(len(indicadores))
+            x = _np.arange(len(indicadores))
             ancho = 0.35
             
             barras1 = ax.bar(x - ancho/2, valores_actuales, ancho, label='Valor Actual',
@@ -1250,7 +1388,7 @@ class ExportadorPDF:
     def _crear_grafica_distribucion_gastos(self, datos: Dict):
         """Crea grafica de pastel con distribucion de gastos."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 6))
+            fig, ax = _plt.subplots(figsize=(10, 6))
             
             finanzas = datos.get('situacion_financiera', {})
             gastos = finanzas.get('gastos', {}) or {}
@@ -1299,7 +1437,7 @@ class ExportadorPDF:
     def _crear_grafica_radar_riesgos(self, datos: Dict):
         """Crea grafica de radar para indicadores de riesgo."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 7), subplot_kw=dict(projection='polar'))
+            fig, ax = _plt.subplots(figsize=(10, 7), subplot_kw=dict(projection='polar'))
             
             riesgos_data = datos.get('riesgos', {})
             
@@ -1322,7 +1460,7 @@ class ExportadorPDF:
             ]
             
             valores_plot = valores + valores[:1]
-            angulos = np.linspace(0, 2 * np.pi, len(categorias), endpoint=False).tolist()
+            angulos = _np.linspace(0, 2 * _np.pi, len(categorias), endpoint=False).tolist()
             angulos += angulos[:1]
             
             ax.plot(angulos, valores_plot, 'o-', linewidth=2, color='#e74c3c', label='Nivel de Riesgo')
@@ -1350,7 +1488,7 @@ class ExportadorPDF:
     def _crear_grafica_actividades(self, datos: Dict):
         """Crea grafica de barras horizontales para actividades."""
         try:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = _plt.subplots(figsize=(10, 5))
             
             estilo = datos.get('estilo_vida', {})
             salud = datos.get('salud_intereses', {})
@@ -1402,7 +1540,6 @@ class ExportadorPDF:
     def _crear_seccion_validacion_documental(self, datos: Dict, elements: list):
         """Crea la seccion de validacion documental."""
         elements.append(PageBreak())
-        elements.append(Paragraph("VALIDACION DOCUMENTAL", self.styles['CustomHeading']))
         
         val = datos.get("validacion_documental", {})
         
@@ -1452,12 +1589,13 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_docs)
-        elements.append(Spacer(1, 0.1*inch))
-        
         # Resumen
         doc_completa = "SI" if val.get("documentacion_completa") else "NO"
-        elements.append(Paragraph(f"<b>Documentacion Completa:</b> {doc_completa}", self.styles['CustomBody']))
+        resumen = Paragraph(f"<b>Documentacion Completa:</b> {doc_completa}", self.styles['CustomBody'])
+        
+        # Usar KeepTogether para mantener titulo y tabla juntos
+        titulo_val = Paragraph("VALIDACION DOCUMENTAL", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_val, tabla_docs, Spacer(1, 0.1*inch), resumen]))
         
         if val.get("observaciones_documentacion"):
             elements.append(Paragraph(f"<b>Observaciones:</b> {val.get('observaciones_documentacion')}", 
@@ -1467,8 +1605,6 @@ class ExportadorPDF:
     
     def _crear_seccion_investigacion_vecinal(self, datos: Dict, elements: list):
         """Crea la seccion de investigacion vecinal."""
-        elements.append(Paragraph("INVESTIGACION VECINAL", self.styles['CustomHeading']))
-        
         inv = datos.get("investigacion_vecinal", {})
         
         # Datos de la visita
@@ -1489,21 +1625,25 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_visita)
-        elements.append(Spacer(1, 0.1*inch))
+        # Usar KeepTogether para titulo y tabla de visita
+        titulo_vecinal = Paragraph("INVESTIGACION VECINAL", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_vecinal, tabla_visita, Spacer(1, 0.1*inch)]))
         
         # Entrevista con vecino
         if inv.get("vecino_entrevistado"):
             elements.append(Paragraph("<b>Entrevista con Vecino:</b>", self.styles['CustomBody']))
             
+            # Usar Paragraphs para word wrap en comentarios
+            label_style_vecino = ParagraphStyle('VecinoLabel', parent=self.styles['Normal'], 
+                                                 fontName='Helvetica-Bold', fontSize=9)
             info_vecino = [
-                ["Nombre del Vecino:", inv.get("vecino_nombre", "N/A")],
-                ["Direccion:", inv.get("vecino_direccion", "N/A")],
-                ["Tiempo de Conocerlo:", inv.get("vecino_tiempo_conocerlo", "N/A")],
-                ["Opinion sobre Comportamiento:", inv.get("vecino_opinion_comportamiento", "N/A")],
-                ["Comentarios:", inv.get("vecino_comentarios", "N/A")],
-                ["Tiempo Residencia Confirmado:", "Si" if inv.get("tiempo_residencia_confirmado") else "No"],
-                ["Tiempo segun Vecino:", inv.get("tiempo_residencia_segun_vecino", "N/A")]
+                [Paragraph("Nombre del Vecino:", label_style_vecino), Paragraph(inv.get("vecino_nombre", "N/A") or "N/A", self.styles['Normal'])],
+                [Paragraph("Direccion:", label_style_vecino), Paragraph(inv.get("vecino_direccion", "N/A") or "N/A", self.styles['Normal'])],
+                [Paragraph("Tiempo de Conocerlo:", label_style_vecino), Paragraph(inv.get("vecino_tiempo_conocerlo", "N/A") or "N/A", self.styles['Normal'])],
+                [Paragraph("Opinion sobre Comportamiento:", label_style_vecino), Paragraph(inv.get("vecino_opinion_comportamiento", "N/A") or "N/A", self.styles['Normal'])],
+                [Paragraph("Comentarios:", label_style_vecino), Paragraph(inv.get("vecino_comentarios", "N/A") or "N/A", self.styles['Normal'])],
+                [Paragraph("Tiempo Residencia Confirmado:", label_style_vecino), Paragraph("Si" if inv.get("tiempo_residencia_confirmado") else "No", self.styles['Normal'])],
+                [Paragraph("Tiempo segun Vecino:", label_style_vecino), Paragraph(inv.get("tiempo_residencia_segun_vecino", "N/A") or "N/A", self.styles['Normal'])]
             ]
             
             tabla_vecino = Table(info_vecino, colWidths=[2.5*inch, 4*inch])
@@ -1513,6 +1653,7 @@ class ExportadorPDF:
                 ('FONTSIZE', (0, 0), (-1, -1), 9),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
                 ('PADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ]))
             
             elements.append(tabla_vecino)
@@ -1564,8 +1705,6 @@ class ExportadorPDF:
     
     def _crear_seccion_analisis_cualitativo(self, datos: Dict, elements: list):
         """Crea la seccion de analisis cualitativo."""
-        elements.append(Paragraph("ANALISIS CUALITATIVO", self.styles['CustomHeading']))
-        
         anal = datos.get("analisis_cualitativo", {})
         
         # Usar Paragraphs para word wrap automatico
@@ -1611,7 +1750,9 @@ class ExportadorPDF:
             ('PADDING', (0, 0), (-1, -1), 6),
         ]))
         
-        elements.append(tabla_cualitativo)
+        # Usar KeepTogether para titulo y tabla de analisis cualitativo
+        titulo_cualitativo = Paragraph("ANALISIS CUALITATIVO", self.styles['CustomHeading'])
+        elements.append(KeepTogether([titulo_cualitativo, tabla_cualitativo]))
         
         if anal.get("observaciones_cualitativas"):
             elements.append(Spacer(1, 0.1*inch))
@@ -1619,6 +1760,72 @@ class ExportadorPDF:
                                      self.styles['CustomBody']))
         
         elements.append(Spacer(1, 0.2*inch))
+    
+    def _crear_seccion_fotos(self, datos: Dict, elements: list):
+        """Crea la seccion de fotos del estudio (fachada, interior, etc.)."""
+        fotos = datos.get("fotos", [])
+        if not fotos:
+            return
+        
+        elements.append(PageBreak())
+        elements.append(Paragraph("ANEXO FOTOGRAFICO", self.styles['CustomHeading']))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        for i, foto in enumerate(fotos):
+            archivo = foto.get("archivo", "")
+            tipo = foto.get("tipo", f"Foto {i+1}")
+            descripcion = foto.get("descripcion", "")
+            
+            if archivo and os.path.exists(archivo):
+                try:
+                    # Titulo de la foto
+                    titulo_foto = Paragraph(f"<b>{tipo}</b>", self.styles['CustomBody'])
+                    
+                    # Cargar imagen con dimensiones apropiadas
+                    from PIL import Image as PILImage
+                    with PILImage.open(archivo) as pil_img:
+                        orig_width, orig_height = pil_img.size
+                        aspect_ratio = orig_width / orig_height if orig_height > 0 else 1
+                        
+                        # Dimensiones maximas para fotos - usar todo el ancho disponible
+                        max_width = 6.0 * inch
+                        max_height = 7.0 * inch
+                        
+                        # Escalar manteniendo proporcion
+                        if aspect_ratio > 1:  # Horizontal
+                            new_width = max_width
+                            new_height = new_width / aspect_ratio
+                        else:  # Vertical
+                            new_height = max_height
+                            new_width = new_height * aspect_ratio
+                        
+                        # Ajustar si excede limites
+                        if new_width > max_width:
+                            new_width = max_width
+                            new_height = new_width / aspect_ratio
+                        if new_height > max_height:
+                            new_height = max_height
+                            new_width = new_height * aspect_ratio
+                        
+                        img = Image(archivo, width=new_width, height=new_height)
+                    
+                    img.hAlign = 'CENTER'
+                    
+                    # Descripcion si existe
+                    foto_elements = [titulo_foto, Spacer(1, 0.1*inch), img]
+                    if descripcion:
+                        foto_elements.append(Spacer(1, 0.05*inch))
+                        foto_elements.append(Paragraph(descripcion, self.styles['CustomBody']))
+                    
+                    foto_elements.append(Spacer(1, 0.3*inch))
+                    
+                    # Usar KeepTogether para mantener foto con su titulo
+                    elements.append(KeepTogether(foto_elements))
+                    
+                except Exception as e:
+                    print(f"Error al procesar foto {archivo}: {e}")
+                    elements.append(Paragraph(f"[Error al cargar imagen: {tipo}]", self.styles['Normal']))
+                    elements.append(Spacer(1, 0.2*inch))
     
     def _crear_seccion_conclusiones_firma(self, datos: Dict, elements: list):
         """Crea la seccion de conclusiones y firma del investigador."""
@@ -1673,8 +1880,8 @@ class ExportadorPDF:
         elements.append(tabla_inv)
         elements.append(Spacer(1, 0.3*inch))
         
-        # Declaracion de veracidad
-        elements.append(Paragraph("DECLARACION DE VERACIDAD", self.styles['CustomHeading']))
+        # Declaracion de veracidad - usar KeepTogether con la firma
+        declaracion_titulo = Paragraph("DECLARACION DE VERACIDAD", self.styles['CustomHeading'])
         
         declaracion_texto = """
         El suscrito declara bajo protesta de decir verdad que la informacion contenida en el 
@@ -1682,32 +1889,131 @@ class ExportadorPDF:
         verificacion documental y/o investigacion de campo. Los datos aqui presentados 
         reflejan fielmente la situacion del evaluado al momento de la investigacion.
         """
-        elements.append(Paragraph(declaracion_texto.strip(), self.styles['CustomBody']))
+        declaracion_parrafo = Paragraph(declaracion_texto.strip(), self.styles['CustomBody'])
         
-        elements.append(Spacer(1, 0.5*inch))
+        # Espacio para firma con imagen opcional
+        firma_path = self.config.get("firma", "")
+        nombre_investigador = inv.get("nombre_investigador", "") or self.config.get("ejecutor", "")
         
-        # Espacio para firma
-        firma_data = [
-            ["_" * 40],
-            [f"Firma del Investigador"],
-            [inv.get("nombre_investigador", "") or self.config.get("ejecutor", "")]
+        if firma_path and os.path.exists(firma_path):
+            # Crear estructura con imagen de firma sobrepuesta a la linea
+            try:
+                # Intentar obtener dimensiones con PIL
+                try:
+                    from PIL import Image as PILImage
+                    with PILImage.open(firma_path) as pil_img:
+                        orig_width, orig_height = pil_img.size
+                        aspect_ratio = orig_width / orig_height if orig_height > 0 else 1
+                        
+                        # Dimensiones maximas para la firma
+                        max_width = 2.0 * inch
+                        max_height = 0.8 * inch
+                        
+                        new_width = min(max_width, orig_width * 0.5)
+                        new_height = new_width / aspect_ratio
+                        
+                        if new_height > max_height:
+                            new_height = max_height
+                            new_width = new_height * aspect_ratio
+                        
+                        firma_img = Image(firma_path, width=new_width, height=new_height)
+                except ImportError:
+                    # Fallback sin PIL
+                    firma_img = Image(firma_path, width=1.5*inch, height=0.6*inch)
+                
+                firma_img.hAlign = 'CENTER'
+                
+                # Tabla con firma grafica
+                firma_data = [
+                    [firma_img],
+                    ["_" * 40],
+                    ["Firma del Investigador"],
+                    [nombre_investigador]
+                ]
+                
+                tabla_firma = Table(firma_data, colWidths=[4*inch])
+                tabla_firma.setStyle(TableStyle([
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 2), (0, 2), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 10),
+                    ('TOPPADDING', (0, 0), (0, 0), 0),
+                    ('BOTTOMPADDING', (0, 0), (0, 0), -10),  # Sobreponer firma a la linea
+                    ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ]))
+                
+            except Exception as e:
+                print(f"Error al cargar imagen de firma: {e}")
+                # Fallback: usar tabla sin imagen
+                firma_data = [
+                    ["_" * 40],
+                    ["Firma del Investigador"],
+                    [nombre_investigador]
+                ]
+                
+                tabla_firma = Table(firma_data, colWidths=[4*inch])
+                tabla_firma.setStyle(TableStyle([
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 1), (0, 1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ]))
+        else:
+            # Sin imagen de firma - solo linea y texto
+            firma_data = [
+                ["_" * 40],
+                ["Firma del Investigador"],
+                [nombre_investigador]
+            ]
+            
+            tabla_firma = Table(firma_data, colWidths=[4*inch])
+            tabla_firma.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (0, 1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ]))
+        
+        # Centrar la tabla de firma y mantener declaracion + firma juntas
+        seccion_firma = [
+            declaracion_titulo,
+            declaracion_parrafo,
+            Spacer(1, 0.5*inch),
+            tabla_firma
         ]
+        elements.append(KeepTogether(seccion_firma))
         
-        tabla_firma = Table(firma_data, colWidths=[4*inch])
-        tabla_firma.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 1), (0, 1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ]))
-        
-        # Centrar la tabla de firma
-        elements.append(tabla_firma)
-        
-        if inv.get("observaciones_finales"):
+        # Observaciones finales - manejar parrafos largos
+        obs_finales = inv.get("observaciones_finales", "") or datos.get("observaciones_finales", "")
+        if obs_finales:
             elements.append(Spacer(1, 0.3*inch))
-            elements.append(Paragraph(f"<b>Observaciones Finales:</b> {inv.get('observaciones_finales')}", 
-                                     self.styles['CustomBody']))
+            titulo_obs = Paragraph("<b>OBSERVACIONES FINALES</b>", self.styles['CustomHeading'])
+            
+            # Dividir por saltos de linea si existen
+            parrafos_obs = obs_finales.split('\n')
+            if len(parrafos_obs) == 1:
+                # Sin saltos de linea, buscar separadores naturales
+                import re
+                parrafos_obs = re.split(r'(?<=[.!?])\s+(?=[A-Z])', obs_finales)
+            
+            # Filtrar parrafos vacios
+            parrafos_obs = [p.strip() for p in parrafos_obs if p.strip()]
+            
+            if parrafos_obs:
+                # Crear lista de elementos para KeepTogether
+                obs_elements = [titulo_obs]
+                for parrafo in parrafos_obs:
+                    obs_elements.append(Paragraph(parrafo, self.styles['CustomBody']))
+                    obs_elements.append(Spacer(1, 0.05*inch))
+                
+                # Si hay pocos parrafos, mantener juntos
+                if len(parrafos_obs) <= 4:
+                    elements.append(KeepTogether(obs_elements))
+                else:
+                    # Si hay muchos, al menos mantener titulo con primer parrafo
+                    elements.append(KeepTogether([titulo_obs, Paragraph(parrafos_obs[0], self.styles['CustomBody'])]))
+                    for parrafo in parrafos_obs[1:]:
+                        elements.append(Paragraph(parrafo, self.styles['CustomBody']))
+                        elements.append(Spacer(1, 0.05*inch))
     
     def exportar(self, datos: Dict, ruta_salida: str):
         """
@@ -1750,6 +2056,7 @@ class ExportadorPDF:
         self._crear_seccion_validacion_documental(datos, elements)
         self._crear_seccion_investigacion_vecinal(datos, elements)
         self._crear_seccion_analisis_cualitativo(datos, elements)
+        self._crear_seccion_fotos(datos, elements)
         self._crear_seccion_conclusiones_firma(datos, elements)
         
         # Construir PDF

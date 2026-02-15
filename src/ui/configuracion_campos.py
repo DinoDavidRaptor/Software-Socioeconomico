@@ -853,36 +853,18 @@ class ConfiguracionCampos:
     
     @staticmethod
     def obtener_campos_informacion_familiar() -> List[Dict[str, Any]]:
-        """Define los campos de la seccion Informacion Familiar."""
+        """
+        Define los campos ADICIONALES de la seccion Informacion Familiar.
+        NOTA: Los campos basicos (numero_hijos, numero_hijos_estudiando, 
+        gasto_mensual_educacion_hijos) estan en PaginaInformacionFamiliar (paginas.py)
+        """
         return [
-            {
-                'id': 'numero_hijos',
-                'etiqueta': 'Numero de Hijos',
-                'tipo': TipoCampo.NUMERO,
-                'requerido': False,
-                'ayuda': 'Total de hijos'
-            },
             {
                 'id': 'numero_hijos_menores',
                 'etiqueta': 'Hijos Menores de Edad',
                 'tipo': TipoCampo.NUMERO,
                 'requerido': False,
                 'ayuda': 'Hijos menores de 18 anos'
-            },
-            {
-                'id': 'numero_hijos_estudiando',
-                'etiqueta': 'Hijos Estudiando',
-                'tipo': TipoCampo.NUMERO,
-                'requerido': False,
-                'ayuda': 'Hijos que actualmente estudian'
-            },
-            {
-                'id': 'gasto_mensual_educacion_hijos',
-                'etiqueta': 'Gasto Mensual Educacion Hijos',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Gasto total mensual en educacion de hijos',
-                'placeholder': '0.00'
             },
             {
                 'id': 'total_miembros_hogar',
@@ -923,37 +905,13 @@ class ConfiguracionCampos:
     
     @staticmethod
     def obtener_campos_situacion_financiera() -> List[Dict[str, Any]]:
-        """Define los campos de la seccion Situacion Financiera."""
+        """
+        Define los campos ADICIONALES de la seccion Situacion Financiera.
+        NOTA: Los campos basicos (trabaja_actualmente, empresa_actual, puesto_actual,
+        sueldo_mensual, prestamos, hipoteca, auto) estan en PaginaSituacionFinanciera 
+        (paginas_parte2.py)
+        """
         return [
-            {
-                'id': 'trabaja_actualmente',
-                'etiqueta': 'Trabaja Actualmente',
-                'tipo': TipoCampo.CHECKBOX,
-                'requerido': False,
-                'ayuda': 'Indica si tiene empleo actualmente'
-            },
-            {
-                'id': 'empresa_actual',
-                'etiqueta': 'Empresa Actual',
-                'tipo': TipoCampo.TEXTO,
-                'requerido': False,
-                'ayuda': 'Nombre de la empresa donde trabaja'
-            },
-            {
-                'id': 'puesto_actual',
-                'etiqueta': 'Puesto Actual',
-                'tipo': TipoCampo.TEXTO,
-                'requerido': False,
-                'ayuda': 'Cargo o puesto que desempena'
-            },
-            {
-                'id': 'sueldo_mensual',
-                'etiqueta': 'Sueldo Mensual',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Sueldo mensual neto',
-                'placeholder': '0.00'
-            },
             {
                 'id': 'ingresos_adicionales',
                 'etiqueta': 'Ingresos Adicionales',
@@ -1025,67 +983,6 @@ class ConfiguracionCampos:
                 'placeholder': '0.00'
             },
             {
-                'id': 'tiene_prestamos_personales',
-                'etiqueta': 'Tiene Prestamos Personales',
-                'tipo': TipoCampo.CHECKBOX,
-                'requerido': False,
-                'ayuda': 'Indica si tiene prestamos personales vigentes'
-            },
-            {
-                'id': 'monto_prestamos_personales',
-                'etiqueta': 'Monto Prestamos Personales',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Deuda total en prestamos personales',
-                'placeholder': '0.00'
-            },
-            {
-                'id': 'tiene_prestamo_hipotecario',
-                'etiqueta': 'Tiene Hipoteca',
-                'tipo': TipoCampo.CHECKBOX,
-                'requerido': False,
-                'ayuda': 'Indica si tiene credito hipotecario'
-            },
-            {
-                'id': 'monto_hipoteca',
-                'etiqueta': 'Monto de Hipoteca',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Saldo pendiente de la hipoteca',
-                'placeholder': '0.00'
-            },
-            {
-                'id': 'pago_mensual_hipoteca',
-                'etiqueta': 'Pago Mensual Hipoteca',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Mensualidad del credito hipotecario',
-                'placeholder': '0.00'
-            },
-            {
-                'id': 'tiene_prestamo_auto',
-                'etiqueta': 'Tiene Prestamo de Auto',
-                'tipo': TipoCampo.CHECKBOX,
-                'requerido': False,
-                'ayuda': 'Indica si tiene credito automotriz'
-            },
-            {
-                'id': 'monto_prestamo_auto',
-                'etiqueta': 'Monto Prestamo Auto',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Saldo pendiente del credito automotriz',
-                'placeholder': '0.00'
-            },
-            {
-                'id': 'pago_mensual_auto',
-                'etiqueta': 'Pago Mensual Auto',
-                'tipo': TipoCampo.DECIMAL,
-                'requerido': False,
-                'ayuda': 'Mensualidad del credito de auto',
-                'placeholder': '0.00'
-            },
-            {
                 'id': 'apoyos_gubernamentales',
                 'etiqueta': 'Apoyos Gubernamentales',
                 'tipo': TipoCampo.TEXTO,
@@ -1131,36 +1028,18 @@ class ConfiguracionCampos:
                 'requerido': False,
                 'ayuda': 'Historial de pagos y deudas previas',
                 'placeholder': 'Buen historial, atrasos, reestructuraciones, etc.'
-            },
-            {
-                'id': 'observaciones_financieras',
-                'etiqueta': 'Observaciones Financieras',
-                'tipo': TipoCampo.TEXTO_LARGO,
-                'requerido': False,
-                'ayuda': 'Notas adicionales sobre la situacion financiera'
             }
         ]
     
     @staticmethod
     def obtener_campos_vivienda() -> List[Dict[str, Any]]:
-        """Define los campos de la seccion Vivienda."""
+        """
+        Define los campos ADICIONALES de la seccion Vivienda.
+        NOTA: Los campos basicos (tipo_vivienda, tenencia, tipo_zona, 
+        materiales_construccion, tiempo_residencia, numero_cuartos, otras_propiedades)
+        estan en PaginaVivienda (paginas_parte2.py)
+        """
         return [
-            {
-                'id': 'tipo_vivienda',
-                'etiqueta': 'Tipo de Vivienda',
-                'tipo': TipoCampo.COMBO,
-                'requerido': False,
-                'ayuda': 'Tipo de inmueble donde vive',
-                'opciones': ['Casa', 'Departamento', 'Cuarto', 'Otro']
-            },
-            {
-                'id': 'tenencia',
-                'etiqueta': 'Tenencia',
-                'tipo': TipoCampo.COMBO,
-                'requerido': False,
-                'ayuda': 'Tipo de posesion de la vivienda',
-                'opciones': ['Propia', 'Rentada', 'Prestada', 'Familiar', 'Otro']
-            },
             {
                 'id': 'regimen',
                 'etiqueta': 'Regimen de Propiedad',
@@ -1170,43 +1049,12 @@ class ConfiguracionCampos:
                 'opciones': ['Propietario unico', 'Copropiedad', 'Condominio', 'N/A']
             },
             {
-                'id': 'tipo_zona',
-                'etiqueta': 'Tipo de Zona',
-                'tipo': TipoCampo.COMBO,
-                'requerido': False,
-                'ayuda': 'Clasificacion de la zona residencial',
-                'opciones': ['Residencial', 'Media', 'Popular', 'Rural', 'Industrial']
-            },
-            {
-                'id': 'materiales_construccion',
-                'etiqueta': 'Materiales de Construccion',
-                'tipo': TipoCampo.COMBO,
-                'requerido': False,
-                'ayuda': 'Material predominante de la vivienda',
-                'opciones': ['Concreto/Ladrillo', 'Block', 'Madera', 'Lamina', 'Mixto', 'Otro']
-            },
-            {
-                'id': 'tiempo_residencia',
-                'etiqueta': 'Tiempo de Residencia',
-                'tipo': TipoCampo.TEXTO,
-                'requerido': False,
-                'ayuda': 'Tiempo viviendo en esta direccion',
-                'placeholder': 'Ej: 3 anos, 6 meses'
-            },
-            {
                 'id': 'tiempo_viviendo_ahi',
                 'etiqueta': 'Tiempo Viviendo en el Lugar',
                 'tipo': TipoCampo.TEXTO,
                 'requerido': False,
                 'ayuda': 'Tiempo total en esta vivienda',
                 'placeholder': 'Ej: 5 anos'
-            },
-            {
-                'id': 'numero_cuartos',
-                'etiqueta': 'Numero de Cuartos',
-                'tipo': TipoCampo.NUMERO,
-                'requerido': False,
-                'ayuda': 'Total de cuartos en la vivienda'
             },
             {
                 'id': 'numero_banos',
@@ -1268,13 +1116,6 @@ class ConfiguracionCampos:
                 'requerido': False,
                 'ayuda': 'Percepcion de seguridad en la zona',
                 'opciones': ['Muy seguro', 'Seguro', 'Moderado', 'Inseguro', 'Muy inseguro']
-            },
-            {
-                'id': 'otras_propiedades',
-                'etiqueta': 'Otras Propiedades',
-                'tipo': TipoCampo.TEXTO_LARGO,
-                'requerido': False,
-                'ayuda': 'Descripcion de otras propiedades que posee'
             },
             {
                 'id': 'numero_propiedades_adicionales',

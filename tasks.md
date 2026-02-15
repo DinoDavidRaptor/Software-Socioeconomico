@@ -78,9 +78,24 @@
   - [x] Tabla miembros hogar: campo ingreso corregido
   - [x] Riesgos: usar valores almacenados del JSON
   - [x] Justificaciones estilo de vida: campos correctos
+- [x] Mejoras exportacion PDF (13/02/2026):
+  - [x] Evitar cortes de informacion entre paginas con KeepTogether (TODAS las secciones)
+  - [x] KeepTogether en todas las graficas (1-6)
+  - [x] Opcion para cargar firma PNG del investigador
+  - [x] Firma se sobrepone automaticamente a linea de firma
   - [x] Eliminar lista cruda de miembros en info familiar
   - [x] Clarificar etiqueta "Ahorro Acumulado" vs "Ahorro Mensual"
   - [x] Mostrar riesgo global con 2 decimales
+- [x] Sincronizar exportador Word con PDF (13/02/2026):
+  - [x] Mismas secciones en el mismo orden
+  - [x] Agregar Validacion Documental, Investigacion Vecinal, Analisis Cualitativo
+  - [x] Agregar Datos del Investigador, Declaracion de Veracidad, Observaciones Finales
+  - [x] Encabezado mejorado con empresa solicitante
+  - [x] Correccion manejo de campos que pueden ser string o lista
+- [x] Eliminar campos duplicados del wizard (13/02/2026):
+  - [x] Crear ANALISIS_CAMPOS.md con concentrado de preguntas
+  - [x] Eliminar 23 duplicados entre paginas tradicionales y modulares
+  - [x] Verificar exportador PDF compatible
 
 ## Mejoras v0.3.3 - Campos Faltantes del PDF
 

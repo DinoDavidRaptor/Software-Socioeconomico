@@ -22,10 +22,11 @@ class DialogoConfiguracion(QDialog):
         self.config_file = config_file
         self.config = self._cargar_config()
         self.logo_path = self.config.get('empresa', {}).get('logo', '')
+        self.firma_path = self.config.get('empresa', {}).get('firma', '')
         self.cambios_guardados = False
         
         self.setWindowTitle("Configuracion de Empresa")
-        self.setFixedSize(500, 450)
+        self.setFixedSize(500, 600)
         self.setModal(True)
         
         self._setup_ui()
@@ -103,6 +104,42 @@ class DialogoConfiguracion(QDialog):
         logo_layout.addLayout(logo_path_layout)
         layout.addWidget(grupo_logo)
         
+        # Grupo de firma del investigador
+        grupo_firma = QGroupBox("Firma del Investigador (PNG)")
+        firma_layout = QVBoxLayout(grupo_firma)
+        
+        # Preview de la firma
+        self.lbl_firma_preview = QLabel("Sin firma")
+        self.lbl_firma_preview.setAlignment(Qt.AlignCenter)
+        self.lbl_firma_preview.setFixedHeight(60)
+        self.lbl_firma_preview.setStyleSheet("border: 1px dashed #ccc; background: #f9f9f9;")
+        firma_layout.addWidget(self.lbl_firma_preview)
+        
+        # Ruta de la firma
+        firma_path_layout = QHBoxLayout()
+        self.txt_firma = QLineEdit()
+        self.txt_firma.setPlaceholderText("Ruta al archivo PNG de firma")
+        self.txt_firma.setReadOnly(True)
+        firma_path_layout.addWidget(self.txt_firma)
+        
+        btn_seleccionar_firma = QPushButton("Seleccionar...")
+        btn_seleccionar_firma.clicked.connect(self._seleccionar_firma)
+        firma_path_layout.addWidget(btn_seleccionar_firma)
+        
+        btn_quitar_firma = QPushButton("Quitar")
+        btn_quitar_firma.clicked.connect(self._quitar_firma)
+        firma_path_layout.addWidget(btn_quitar_firma)
+        
+        firma_layout.addLayout(firma_path_layout)
+        
+        # Nota informativa
+        nota_firma = QLabel("La firma se sobrepondra en el PDF donde firma el investigador.")
+        nota_firma.setStyleSheet("color: #666; font-size: 10px; font-style: italic;")
+        nota_firma.setWordWrap(True)
+        firma_layout.addWidget(nota_firma)
+        
+        layout.addWidget(grupo_firma)
+        
         # Botones
         btn_layout = QHBoxLayout()
         
@@ -138,6 +175,11 @@ class DialogoConfiguracion(QDialog):
         if logo:
             self.txt_logo.setText(logo)
             self._mostrar_preview_logo(logo)
+        
+        firma = empresa.get('firma', '')
+        if firma:
+            self.txt_firma.setText(firma)
+            self._mostrar_preview_firma(firma)
     
     def _seleccionar_logo(self):
         """Abre dialogo para seleccionar logo."""
@@ -187,6 +229,57 @@ class DialogoConfiguracion(QDialog):
                 )
                 self.lbl_logo_preview.setText("")
     
+    def _seleccionar_firma(self):
+        """Abre dialogo para seleccionar firma PNG."""
+        archivo, _ = QFileDialog.getOpenFileName(
+            self,
+            "Seleccionar Firma PNG",
+            "",
+            "Imagenes PNG (*.png);;Todos (*.*)"
+        )
+        
+        if archivo:
+            # Copiar a assets si no esta ahi
+            assets_dir = "assets"
+            os.makedirs(assets_dir, exist_ok=True)
+            
+            nombre_archivo = os.path.basename(archivo)
+            # Renombrar para evitar conflictos
+            if not nombre_archivo.startswith("firma_"):
+                nombre_archivo = f"firma_{nombre_archivo}"
+            destino = os.path.join(assets_dir, nombre_archivo)
+            
+            if archivo != destino:
+                import shutil
+                try:
+                    shutil.copy2(archivo, destino)
+                    self.firma_path = destino
+                except Exception as e:
+                    QMessageBox.warning(self, "Error", f"No se pudo copiar la firma: {e}")
+                    self.firma_path = archivo
+            else:
+                self.firma_path = archivo
+            
+            self.txt_firma.setText(self.firma_path)
+            self._mostrar_preview_firma(self.firma_path)
+    
+    def _quitar_firma(self):
+        """Quita la firma seleccionada."""
+        self.firma_path = ""
+        self.txt_firma.setText("")
+        self.lbl_firma_preview.setPixmap(QPixmap())
+        self.lbl_firma_preview.setText("Sin firma")
+    
+    def _mostrar_preview_firma(self, path: str):
+        """Muestra preview de la firma."""
+        if path and os.path.exists(path):
+            pixmap = QPixmap(path)
+            if not pixmap.isNull():
+                self.lbl_firma_preview.setPixmap(
+                    pixmap.scaled(120, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                )
+                self.lbl_firma_preview.setText("")
+    
     def _guardar(self):
         """Guarda la configuracion."""
         nombre = self.txt_nombre.text().strip()
@@ -200,7 +293,8 @@ class DialogoConfiguracion(QDialog):
             'direccion': self.txt_direccion.text().strip(),
             'telefono': self.txt_telefono.text().strip(),
             'email': self.txt_email.text().strip(),
-            'logo': self.logo_path
+            'logo': self.logo_path,
+            'firma': self.firma_path
         }
         
         try:

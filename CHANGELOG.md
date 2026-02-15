@@ -4,6 +4,63 @@ Registro de cambios y versiones del sistema de estudios socioeconomicos.
 
 ---
 
+## [0.4.5] - 13 de febrero de 2026 - EXPORTACION WORD VIA PDF
+
+### Modificado
+
+- **Exportador Word reescrito completamente** (v0.4.0)
+  - Ahora convierte el PDF directamente a DOCX usando pdf2docx
+  - Garantiza estilo identico entre PDF y Word
+  - Dependencia nueva: pdf2docx==0.5.8, PyMuPDF==1.24.0
+
+---
+
+## [0.4.4] - 13 de febrero de 2026 - MEJORAS EN EXPORTACION PDF Y WORD
+
+### Agregado
+
+- **Firma digital del investigador**: Opcion para cargar imagen PNG de firma
+  - Nueva seccion en Configuracion de Empresa para seleccionar firma
+  - La firma se sobrepone automaticamente a la linea de firma en el PDF
+  - Soporte para dimensiones automaticas con PIL
+
+- **Exportador Word sincronizado con PDF** (v0.3.0)
+  - Mismas secciones que el PDF en el mismo orden
+  - (Reemplazado por conversion PDF en v0.4.5)
+
+### Corregido
+
+- **Evitar cortes de informacion entre paginas en PDF** (mejora completa)
+  - KeepTogether aplicado a TODAS las secciones del PDF:
+    - Datos Personales, Salud e Intereses
+    - Informacion Familiar, Situacion Financiera
+    - Empleo Actual, Estilo de Vida, Vivienda
+    - Historial Laboral, Referencias, Analisis de Riesgos
+    - Validacion Documental, Investigacion Vecinal
+    - Analisis Cualitativo, Conclusiones y Firma
+  - KeepTogether en TODAS las graficas (1-6) para mantener titulo e imagen juntos
+  - Las tablas y sus titulos ahora se mantienen en la misma pagina
+  - Si no hay espacio, la seccion completa salta a una nueva pagina
+  - Observaciones finales divididas por parrafos para mejor legibilidad
+
+---
+
+## [0.4.3] - 13 de febrero de 2026 - ELIMINACION DE DUPLICADOS
+
+### Corregido
+
+- **Eliminados 23 campos duplicados** entre paginas tradicionales y modulares del wizard
+  - Familia: 3 campos (numero_hijos, numero_hijos_estudiando, gasto_mensual_educacion_hijos)
+  - Finanzas: 13 campos (trabaja_actualmente, empresa_actual, puesto_actual, etc.)
+  - Vivienda: 7 campos (tipo_vivienda, tenencia, tipo_zona, etc.)
+- Las paginas _ADICIONAL ahora solo muestran campos complementarios, no repetidos
+
+### Agregado
+
+- **ANALISIS_CAMPOS.md**: Documento con analisis completo de campos por pagina
+
+---
+
 ## [0.4.2] - 12 de febrero de 2026 - REBRANDING
 
 ### Modificado

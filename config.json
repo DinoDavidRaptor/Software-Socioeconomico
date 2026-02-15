@@ -1,9 +1,10 @@
 {
   "empresa": {
     "nombre": "Human Connection",
-    "direccion": "Sin dirección",
+    "direccion": "-",
     "telefono": "+52 (33) 1473-2349",
     "email": "rcastaneda@humanconnection.mx",
-    "logo": "assets/hc.png"
+    "logo": "assets/hc.png",
+    "firma": "assets/firma.png"
   }
 }

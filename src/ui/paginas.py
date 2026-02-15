@@ -13,8 +13,8 @@ from PyQt5.QtWidgets import (
     QGroupBox, QRadioButton, QButtonGroup, QMessageBox, QScrollArea,
     QWidget, QDateEdit
 )
-from PyQt5.QtCore import Qt, QDate
-from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QDate, QRegExp
+from PyQt5.QtGui import QFont, QRegExpValidator, QIntValidator
 import os
 import shutil
 from datetime import datetime
@@ -112,27 +112,32 @@ class PaginaDatosPersonales(PaginaBase):
         self.campos['curp'] = QLineEdit()
         self.campos['curp'].setPlaceholderText("18 caracteres")
         self.campos['curp'].setMaxLength(18)
+        self.campos['curp'].setValidator(QRegExpValidator(QRegExp(r"[A-Z0-9]{0,18}")))
         layout.addRow("CURP:", self.campos['curp'])
         
         # INE
         self.campos['ine'] = QLineEdit()
-        self.campos['ine'].setPlaceholderText("Clave de elector")
+        self.campos['ine'].setPlaceholderText("Clave de elector (18 caracteres)")
+        self.campos['ine'].setMaxLength(18)
+        self.campos['ine'].setValidator(QRegExpValidator(QRegExp(r"[A-Z0-9]{0,18}")))
         layout.addRow("Clave INE:", self.campos['ine'])
         
         # RFC
         self.campos['rfc'] = QLineEdit()
         self.campos['rfc'].setPlaceholderText("13 caracteres")
         self.campos['rfc'].setMaxLength(13)
+        self.campos['rfc'].setValidator(QRegExpValidator(QRegExp(r"[A-Z0-9]{0,13}")))
         layout.addRow("RFC:", self.campos['rfc'])
         
         # NSS
         self.campos['nss'] = QLineEdit()
-        self.campos['nss'].setPlaceholderText("Número de Seguridad Social")
+        self.campos['nss'].setPlaceholderText("11 digitos")
         self.campos['nss'].setMaxLength(11)
+        self.campos['nss'].setValidator(QRegExpValidator(QRegExp(r"[0-9]{0,11}")))
         layout.addRow("NSS:", self.campos['nss'])
         
         # Licencia de conducir
-        self.campos['licencia_conducir'] = QCheckBox("Sí tiene licencia de conducir")
+        self.campos['licencia_conducir'] = QCheckBox("Si tiene licencia de conducir")
         layout.addRow("Licencia de Conducir:", self.campos['licencia_conducir'])
         
         self.campos['tipo_licencia'] = QComboBox()
@@ -144,8 +149,10 @@ class PaginaDatosPersonales(PaginaBase):
         
         # Teléfono
         self.campos['telefono'] = QLineEdit()
-        self.campos['telefono'].setPlaceholderText("10 dígitos")
-        layout.addRow("*Teléfono:", self.campos['telefono'])
+        self.campos['telefono'].setPlaceholderText("10 digitos")
+        self.campos['telefono'].setValidator(QRegExpValidator(QRegExp(r"[0-9]{0,10}")))
+        self.campos['telefono'].setMaxLength(10)
+        layout.addRow("*Telefono:", self.campos['telefono'])
         self.registerField("telefono*", self.campos['telefono'])
         
         # Email

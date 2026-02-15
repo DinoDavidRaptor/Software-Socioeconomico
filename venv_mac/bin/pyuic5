@@ -1,0 +1,8 @@
+#!/bin/sh
+'''exec' "/Users/dino/Documents/software socioeconomico/venv_mac/bin/python3" "$0" "$@"
+' '''
+import sys
+from PyQt5.uic.pyuic import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Script de ejecución para SoftSE
 # Activa el entorno virtual y ejecuta la aplicación
 

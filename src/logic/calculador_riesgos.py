@@ -29,7 +29,10 @@ class CalculadorRiesgos:
         if ingreso_total <= 0:
             # Calcular desde componentes
             sueldo = fin.get("sueldo_mensual", 0)
-            otros_ingresos = sum(ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict))
+            otros_ingresos_lista = fin.get("otros_ingresos", [])
+            if not isinstance(otros_ingresos_lista, list):
+                otros_ingresos_lista = []
+            otros_ingresos = sum(ing.get("monto", 0) for ing in otros_ingresos_lista if isinstance(ing, dict))
             ingreso_total = sueldo + otros_ingresos
         
         if ingreso_total <= 0:
@@ -170,8 +173,12 @@ class CalculadorRiesgos:
         ingreso_per_capita = fam.get("ingreso_per_capita", 0)
         if ingreso_per_capita <= 0:
             # Fallback calculation only if not available
+            otros_ingresos = fin.get("otros_ingresos", [])
+            # Asegurar que otros_ingresos sea una lista
+            if not isinstance(otros_ingresos, list):
+                otros_ingresos = []
             ingreso_total = fin.get("sueldo_mensual", 0) + sum(
-                ing.get("monto", 0) for ing in fin.get("otros_ingresos", []) if isinstance(ing, dict)
+                ing.get("monto", 0) for ing in otros_ingresos if isinstance(ing, dict)
             )
             ingreso_per_capita = ingreso_total / max(1, num_miembros) if num_miembros > 0 else ingreso_total
         else:

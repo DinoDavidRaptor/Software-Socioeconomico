@@ -5,7 +5,7 @@ Versión: 0.2.0 - Sistema modular con 150+ campos
 """
 
 from PyQt5.QtWidgets import QWizard, QWizardPage, QMessageBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from src.models.estudio import EstudioSocioeconomico
 from src.logic.calculador_riesgos import CalculadorRiesgos
 from src.utils.generador_datos_prueba import GeneradorDatosPrueba
@@ -86,6 +86,11 @@ class WizardEstudio(QWizard):
         self.estudio = estudio or EstudioSocioeconomico()
         self.es_edicion = estudio is not None
         
+        # Timer para auto-guardado cada 10 segundos (reducido para evitar perdida de datos)
+        self.auto_save_timer = QTimer(self)
+        self.auto_save_timer.timeout.connect(self._auto_guardar)
+        self.auto_save_timer.start(10000)  # 10 segundos
+        
         self.init_ui()
     
     def init_ui(self):
@@ -157,6 +162,20 @@ class WizardEstudio(QWizard):
         
         # Conectar señal de finalización
         self.finished.connect(self.al_finalizar)
+        
+        # Conectar señal de cambio de página para auto-guardar
+        self.currentIdChanged.connect(self._on_pagina_cambiada)
+    
+    def _on_pagina_cambiada(self, page_id):
+        """
+        Se ejecuta cada vez que el usuario cambia de pagina.
+        Guarda automaticamente para prevenir perdida de datos.
+        """
+        try:
+            self.guardar_datos_temporales()
+            self.estudio.guardar()
+        except Exception as e:
+            print(f"Error al guardar en cambio de pagina: {e}")
     
     def on_custom_button_clicked(self, which):
         """Maneja clics en botones personalizados."""
@@ -232,6 +251,51 @@ class WizardEstudio(QWizard):
             if page and hasattr(page, 'guardar_datos'):
                 page.guardar_datos()
     
+    def _auto_guardar(self):
+        """
+        Auto-guarda los datos del estudio cada 30 segundos.
+        Esto previene perdida de informacion en caso de errores o cierres inesperados.
+        """
+        try:
+            self.guardar_datos_temporales()
+            self.estudio.guardar()
+        except Exception as e:
+            # Silencioso - no interrumpir al usuario con errores de auto-guardado
+            print(f"Auto-guardado fallido: {e}")
+
+    def reject(self):
+        """
+        Se ejecuta cuando el usuario cancela o cierra el wizard.
+        Guarda automaticamente para no perder el trabajo.
+        """
+        # Detener timer de auto-guardado
+        self.auto_save_timer.stop()
+        
+        # Guardar datos antes de cerrar
+        try:
+            self.guardar_datos_temporales()
+            guardado = self.estudio.guardar()
+            if guardado:
+                nombre = self.estudio.datos.get('datos_personales', {}).get('nombre_completo', '').strip()
+                if nombre:
+                    QMessageBox.information(
+                        self,
+                        "Estudio Guardado",
+                        f"El estudio de '{nombre}' se guardo automaticamente.\n"
+                        "Puede continuar editandolo despues."
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        "Estudio Guardado",
+                        "El estudio se guardo como borrador.\n"
+                        "Puede continuar editandolo despues."
+                    )
+        except Exception as e:
+            print(f"Error al guardar al cerrar: {e}")
+        
+        super().reject()
+
     def al_finalizar(self, result):
         """
         Se ejecuta cuando se finaliza el wizard.
@@ -239,6 +303,9 @@ class WizardEstudio(QWizard):
         Args:
             result: Resultado del wizard (aceptado o rechazado).
         """
+        # Detener timer de auto-guardado
+        self.auto_save_timer.stop()
+        
         if result == QWizard.Accepted:
             # Guardar datos de todas las páginas
             self.guardar_datos_temporales()
